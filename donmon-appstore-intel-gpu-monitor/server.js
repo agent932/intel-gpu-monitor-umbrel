@@ -8,6 +8,19 @@ const fs = require('fs');
 const app = express();
 const PORT = process.env.PORT || 8847;
 
+// Log ALL incoming requests
+app.use((req, res, next) => {
+    console.log('='.repeat(60));
+    console.log('[REQUEST]', new Date().toISOString());
+    console.log('[METHOD]', req.method);
+    console.log('[URL]', req.url);
+    console.log('[PATH]', req.path);
+    console.log('[HEADERS]', JSON.stringify(req.headers, null, 2));
+    console.log('[QUERY]', JSON.stringify(req.query, null, 2));
+    console.log('='.repeat(60));
+    next();
+});
+
 // Create HTTP server
 const server = http.createServer(app);
 
@@ -174,22 +187,28 @@ wss.on('connection', function(ws) {
 // UMBREL WIDGET API ENDPOINT
 // =====================================================
 app.get('/widgets/gpu', function(req, res) {
+    console.log('[WIDGET] ========== GPU WIDGET REQUEST ==========');
     console.log('[WIDGET] Request received at', new Date().toISOString());
+    console.log('[WIDGET] Request URL:', req.url);
+    console.log('[WIDGET] Request headers:', JSON.stringify(req.headers, null, 2));
     console.log('[WIDGET] GPU Available:', isGpuAvailable);
     console.log('[WIDGET] Has latest data:', !!latestGpuData);
+    console.log('[WIDGET] Latest data keys:', latestGpuData ? Object.keys(latestGpuData) : 'null');
     
     if (!isGpuAvailable || !latestGpuData || !latestGpuData.data) {
         // Return placeholder data when GPU is not available
         // Umbrel widgets ONLY return 'items' - type and refresh are defined in umbrel-app.yml
         console.log('[WIDGET] Returning placeholder data');
-        return res.json({
+        const placeholderData = {
             items: [
                 { title: 'GPU Usage', text: '--', subtext: '%' },
                 { title: 'Frequency', text: '--', subtext: 'MHz' },
                 { title: 'Power', text: '--', subtext: 'W' },
                 { title: 'RC6 Idle', text: '--', subtext: '%' }
             ]
-        });
+        };
+        console.log('[WIDGET] Placeholder response:', JSON.stringify(placeholderData, null, 2));
+        return res.json(placeholderData);
     }
 
     var data = latestGpuData.data;
@@ -224,7 +243,14 @@ app.get('/widgets/gpu', function(req, res) {
         ]
     };
     
-    console.log('[WIDGET] Returning data:', JSON.stringify(widgetData));
+    console.log('[WIDGET] Calculated values:');
+    console.log('[WIDGET]   GPU Busy:', gpuBusy.toFixed(1), '% (from', engineCount, 'engines)');
+    console.log('[WIDGET]   Frequency:', actualFreq.toFixed(0), 'MHz');
+    console.log('[WIDGET]   Power:', gpuPower.toFixed(1), 'W');
+    console.log('[WIDGET]   RC6:', rc6Percent.toFixed(1), '%');
+    console.log('[WIDGET] Final response data:', JSON.stringify(widgetData, null, 2));
+    console.log('[WIDGET] ========================================');
+    
     res.json(widgetData);
 });
 
