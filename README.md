@@ -71,27 +71,28 @@ Intel GPU Monitor is a beautiful, real-time monitoring dashboard for Intel integ
 - Intel CPU with integrated graphics (iGPU)
 - `/dev/dri` device access (automatically configured)
 
-### Method 1: Community App Store (Recommended)
+### Install via Community App Store
 
-1. Open your Umbrel dashboard
-2. Go to **App Store**
-3. Search for **"Intel GPU Monitor"**
-4. Click **Install**
+1. **Add the Agent932 Community App Store** to your Umbrel:
+   - Go to **Settings** → **App Store**
+   - Click **"Community App Stores"**
+   - Click **"Add App Store"**
+   - Enter the repository URL:
+     ```
+     https://github.com/agent932/intel-gpu-monitor-umbrel
+     ```
+   - Click **"Add"**
 
-### Method 2: Manual Installation
+2. **Install Intel GPU Monitor**:
+   - Go to **App Store**
+   - Find **Intel GPU Monitor** in the Agent932 community store
+   - Click **Install**
 
-1. Add this app store to your Umbrel:
-```bash
-# SSH into your Umbrel
-ssh umbrel@umbrel.local
+That's it! The app will be available at `http://umbrel.local:8847`
 
-# Add the community app store
-# (Instructions coming soon)
-```
+### Alternative: Manual Installation (Advanced)
 
-2. The app will appear in your App Store
-
-### Method 3: Developer Installation
+For developers or advanced users who want to install directly:
 
 ```bash
 # Clone the repository
