@@ -1,9 +1,12 @@
 const express = require('express');
 const { WebSocketServer } = require('ws');
-const { spawn } = require('child_process');
+const { spawn, exec } = require('child_process');
 const http = require('http');
 const path = require('path');
 const fs = require('fs');
+const { promisify } = require('util');
+
+const execAsync = promisify(exec);
 
 const app = express();
 const PORT = process.env.PORT || 8847;
@@ -27,8 +30,9 @@ const server = http.createServer(app);
 // Create WebSocket server
 const wss = new WebSocketServer({ server, path: '/ws' });
 
-// Store latest GPU data
+// Store latest GPU data and processes
 let latestGpuData = null;
+let latestGpuProcesses = [];
 let gpuProcess = null;
 let isGpuAvailable = false;
 
@@ -42,6 +46,99 @@ function parseGpuData(jsonStr) {
         return null;
     }
 }
+
+// Get processes using the GPU
+async function getGpuProcesses() {
+    try {
+        const processes = [];
+        
+        // Method 1: Check /sys/kernel/debug/dri/0/clients
+        const clientsPath = '/sys/kernel/debug/dri/0/clients';
+        if (fs.existsSync(clientsPath)) {
+            const clientsData = await fs.promises.readFile(clientsPath, 'utf8');
+            const lines = clientsData.split('\n').slice(1); // Skip header
+            
+            for (const line of lines) {
+                if (!line.trim()) continue;
+                const parts = line.trim().split(/\s+/);
+                if (parts.length >= 2) {
+                    const command = parts[0];
+                    const pid = parts[1];
+                    
+                    try {
+                        const cmdline = await fs.promises.readFile(`/proc/${pid}/cmdline`, 'utf8');
+                        const processName = cmdline.replace(/\0/g, ' ').trim() || command;
+                        processes.push({ name: processName, pid: parseInt(pid), command: command });
+                    } catch (e) {
+                        processes.push({ name: command, pid: parseInt(pid), command: command });
+                    }
+                }
+            }
+            return processes;
+        }
+        
+        // Method 2: Use lsof
+        try {
+            const { stdout } = await execAsync('lsof /dev/dri/render* /dev/dri/card* 2>/dev/null || true');
+            const lines = stdout.split('\n').slice(1);
+            const seen = new Set();
+            
+            for (const line of lines) {
+                if (!line.trim()) continue;
+                const parts = line.trim().split(/\s+/);
+                if (parts.length >= 2) {
+                    const command = parts[0];
+                    const pid = parts[1];
+                    const key = `${command}-${pid}`;
+                    
+                    if (!seen.has(key)) {
+                        seen.add(key);
+                        processes.push({ name: command, pid: parseInt(pid), command: command });
+                    }
+                }
+            }
+            return processes;
+        } catch (e) {
+            // lsof not available
+        }
+        
+        // Method 3: Use fuser
+        try {
+            const { stdout } = await execAsync('fuser /dev/dri/render* /dev/dri/card* 2>/dev/null || true');
+            const pids = stdout.trim().split(/\s+/).filter(p => p && /^\d+$/.test(p));
+            
+            for (const pid of pids) {
+                try {
+                    const cmdline = await fs.promises.readFile(`/proc/${pid}/cmdline`, 'utf8');
+                    const command = cmdline.split('\0')[0] || 'unknown';
+                    const processName = cmdline.replace(/\0/g, ' ').trim();
+                    processes.push({ name: processName || command, pid: parseInt(pid), command: command.split('/').pop() });
+                } catch (e) {
+                    // Process exited
+                }
+            }
+            return processes;
+        } catch (e) {
+            // fuser not available
+        }
+        
+        return [];
+    } catch (error) {
+        console.error('Error getting GPU processes:', error.message);
+        return [];
+    }
+}
+
+// Update GPU processes periodically
+async function updateGpuProcesses() {
+    if (isGpuAvailable) {
+        latestGpuProcesses = await getGpuProcesses();
+    }
+}
+
+// Update processes every 2 seconds
+setInterval(updateGpuProcesses, 2000);
+
 
 // Start intel_gpu_top process
 function startGpuMonitor() {
@@ -153,7 +250,8 @@ function broadcastGpuData() {
         type: 'gpu_data',
         available: isGpuAvailable,
         timestamp: latestGpuData ? latestGpuData.timestamp : null,
-        data: latestGpuData ? latestGpuData.data : null
+        data: latestGpuData ? latestGpuData.data : null,
+        processes: latestGpuProcesses
     });
     
     wss.clients.forEach(function(client) {
@@ -171,7 +269,8 @@ wss.on('connection', function(ws) {
         type: 'status',
         available: isGpuAvailable,
         timestamp: latestGpuData ? latestGpuData.timestamp : null,
-        data: latestGpuData ? latestGpuData.data : null
+        data: latestGpuData ? latestGpuData.data : null,
+        processes: latestGpuProcesses
     }));
     
     ws.on('close', function() {
@@ -180,6 +279,24 @@ wss.on('connection', function(ws) {
     
     ws.on('error', function(err) {
         console.error('WebSocket error:', err.message);
+    });
+});
+
+// API endpoint to get GPU processes
+app.get('/api/processes', async function(req, res) {
+    console.log('[API] GPU processes requested');
+    
+    if (!isGpuAvailable) {
+        return res.json({ available: false, processes: [] });
+    }
+    
+    // Force update processes
+    await updateGpuProcesses();
+    
+    res.json({
+        available: true,
+        processes: latestGpuProcesses,
+        count: latestGpuProcesses.length
     });
 });
 
