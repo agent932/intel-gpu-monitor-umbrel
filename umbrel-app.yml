@@ -1,0 +1,81 @@
+manifestVersion: 1
+id: donmon-intel-gpu-monitor
+category: developer
+name: Intel GPU Monitor
+version: "1.1.0"
+tagline: Real-time Intel Arc GPU monitoring dashboard
+description: >-
+  Intel GPU Monitor provides a real-time web dashboard for monitoring your Intel Arc GPU
+  using intel_gpu_top. Track GPU utilization, render engine usage, video encode/decode
+  activity, power consumption, and more.
+
+
+  Perfect for monitoring Intel Arc A380, A750, A770, and other Intel discrete GPUs
+  on your Umbrel server.
+
+
+  Features:
+
+  - Real-time GPU utilization metrics
+
+  - Render engine activity monitoring
+
+  - Video encode/decode engine stats
+
+  - Power consumption tracking
+
+  - Memory usage statistics
+
+  - Clean, responsive web interface
+
+  - Auto-refreshing dashboard
+
+  - Homepage widget support
+
+
+  ⚠️ REQUIREMENTS:
+
+  Your Umbrel server must have an Intel Arc GPU installed with the appropriate drivers.
+  The container requires privileged access for GPU monitoring.
+developer: DonMon
+website: https://github.com/donmon
+dependencies: []
+repo: https://github.com/donmon/intel-gpu-monitor
+support: https://github.com/donmon/intel-gpu-monitor/issues
+port: 8847
+gallery: []
+path: ""
+defaultUsername: ""
+defaultPassword: ""
+widgets:
+  - id: "stats"
+    type: "four-stats"
+    refresh: "2s"
+    endpoint: "donmon-intel-gpu-monitor_web_1:8847/widgets/gpu"
+    link: ""
+    example:
+      type: "four-stats"
+      link: ""
+      items:
+        - title: "GPU Usage"
+          text: "42.5"
+          subtext: "%"
+        - title: "Frequency"
+          text: "2100"
+          subtext: "MHz"
+        - title: "Power"
+          text: "85.2"
+          subtext: "W"
+        - title: "RC6 Idle"
+          text: "57.5"
+          subtext: "%"
+submitter: DonMon
+submission: https://github.com/donmon/intel-gpu-monitor
+releaseNotes: >-
+  Version 1.1.0 - Added Umbrel homepage widget support!
+  
+  - New four-stats widget shows GPU usage, frequency, power, and idle state
+  
+  - Widget auto-refreshes every 2 seconds
+  
+  - Umbrel-styled dashboard interface
