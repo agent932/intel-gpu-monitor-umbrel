@@ -52,10 +52,29 @@ function startGpuMonitor() {
     }
 
     console.log('Spawning intel_gpu_top process...');
+    
+    // First, test if intel_gpu_top works at all
+    console.log('Testing intel_gpu_top command...');
+    var testProcess = spawn('intel_gpu_top', ['--help']);
+    
+    testProcess.on('error', function(err) {
+        console.error('intel_gpu_top command not found or cannot execute:', err.message);
+    });
+    
+    testProcess.stderr.on('data', function(data) {
+        console.log('intel_gpu_top test stderr:', data.toString());
+    });
+    
+    testProcess.on('close', function(code) {
+        console.log('intel_gpu_top test exited with code:', code);
+    });
+    
     // Run intel_gpu_top with JSON output, updating every second
     gpuProcess = spawn('intel_gpu_top', ['-J', '-s', '1000'], {
         stdio: ['pipe', 'pipe', 'pipe']
     });
+    
+    console.log('intel_gpu_top process spawned with PID:', gpuProcess.pid);
 
     let buffer = '';
     let braceCount = 0;
@@ -63,6 +82,7 @@ function startGpuMonitor() {
     let jsonStart = 0;
 
     gpuProcess.stdout.on('data', function(data) {
+        console.log('Received data from intel_gpu_top, length:', data.length);
         const chunk = data.toString();
         
         for (let i = 0; i < chunk.length; i++) {
@@ -122,7 +142,16 @@ function startGpuMonitor() {
         isGpuAvailable = false;
     });
 
+    // Check if we receive data within 5 seconds
+    var dataTimeout = setTimeout(function() {
+        if (!isGpuAvailable) {
+            console.error('WARNING: No data received from intel_gpu_top after 5 seconds');
+            console.error('This might indicate a permissions issue or the GPU is not accessible');
+        }
+    }, 5000);
+
     gpuProcess.on('close', function(code) {
+        clearTimeout(dataTimeout);
         console.log('intel_gpu_top exited with code ' + code);
         isGpuAvailable = false;
         
