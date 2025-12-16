@@ -54,8 +54,6 @@ widgets:
     endpoint: "widget-server:80/widgets/gpu"
     link: ""
     example:
-      type: "four-stats"
-      link: ""
       items:
         - title: "GPU Usage"
           text: "42.5"
