@@ -6,6 +6,7 @@ RUN apt-get update && apt-get install -y \
     intel-gpu-tools \
     libdrm2 \
     libpciaccess0 \
+    procps \
     && rm -rf /var/lib/apt/lists/*
 
 # Create app directory
@@ -25,6 +26,9 @@ RUN mkdir -p /data
 
 # Expose port
 EXPOSE 8847
+
+# Run as root to allow intel_gpu_top to access GPU
+USER root
 
 # Run the application
 CMD ["node", "server.js"]

@@ -33,14 +33,25 @@ function parseGpuData(jsonStr) {
 // Start intel_gpu_top process
 function startGpuMonitor() {
     console.log('Starting intel_gpu_top monitor...');
+    console.log('Checking for /dev/dri...');
     
     // Check if /dev/dri exists
     if (!fs.existsSync('/dev/dri')) {
         console.error('ERROR: /dev/dri not found. Intel GPU not available.');
+        console.error('Container may not have access to GPU devices.');
         isGpuAvailable = false;
         return;
     }
+    
+    console.log('/dev/dri found. Listing DRI devices...');
+    try {
+        const devices = fs.readdirSync('/dev/dri');
+        console.log('DRI devices:', devices);
+    } catch (e) {
+        console.error('Error reading /dev/dri:', e.message);
+    }
 
+    console.log('Spawning intel_gpu_top process...');
     // Run intel_gpu_top with JSON output, updating every second
     gpuProcess = spawn('intel_gpu_top', ['-J', '-s', '1000'], {
         stdio: ['pipe', 'pipe', 'pipe']
@@ -163,8 +174,16 @@ wss.on('connection', function(ws) {
 // UMBREL WIDGET API ENDPOINT
 // =====================================================
 app.get('/widgets/gpu', function(req, res) {
+    console.log('Widget endpoint called - isGpuAvailable:', isGpuAvailable, 'hasData:', !!latestGpuData);
+    
+    // Set CORS headers for Umbrel
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    res.setHeader('Access-Control-Allow-Methods', 'GET');
+    res.setHeader('Content-Type', 'application/json');
+    
     if (!isGpuAvailable || !latestGpuData || !latestGpuData.data) {
         // Return placeholder data when GPU is not available
+        console.log('Returning placeholder data for widget');
         return res.json({
             type: 'four-stats',
             refresh: '5s',
@@ -200,8 +219,10 @@ app.get('/widgets/gpu', function(req, res) {
     var gpuPower = power.GPU || 0;
     var rc6Percent = rc6.value || 0;
 
+    console.log('Widget data:', { gpuBusy, actualFreq, gpuPower, rc6Percent });
+
     // umbrelOS expects strings for all fields
-    res.json({
+    var widgetResponse = {
         type: 'four-stats',
         refresh: '2s',
         items: [
@@ -210,7 +231,10 @@ app.get('/widgets/gpu', function(req, res) {
             { title: 'Power', text: gpuPower.toFixed(1), subtext: 'W' },
             { title: 'RC6 Idle', text: rc6Percent.toFixed(1), subtext: '%' }
         ]
-    });
+    };
+    
+    console.log('Sending widget response:', JSON.stringify(widgetResponse));
+    res.json(widgetResponse);
 });
 
 // Health check endpoint
