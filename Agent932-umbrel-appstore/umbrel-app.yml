@@ -1,0 +1,61 @@
+manifestVersion: 1
+id: intel-gpu-monitor
+category: utilities
+name: Intel GPU Monitor
+version: "1.0.0"
+tagline: Real-time Intel GPU monitoring for your home server
+description: >-
+  Intel GPU Monitor provides real-time monitoring of Intel integrated GPUs for Umbrel.
+  Perfect for seeing which apps are using hardware acceleration and monitoring GPU
+  performance on Intel-based home servers.
+
+
+  Track GPU usage, frequency, power consumption, and see exactly which apps
+  (like Plex or Jellyfin) are using your GPU for hardware transcoding.
+
+
+  Features:
+  - Real-time GPU metrics (usage, frequency, power)
+  - Per-engine breakdown (Video decode/encode, Render/3D, Blitter)
+  - Process detection - see which apps are using GPU
+  - Automatic app recognition (Plex, Jellyfin, Emby, etc.)
+  - Beautiful web dashboard with live updates
+  - Umbrel homepage widget support
+
+
+  Requirements:
+  - Intel CPU with integrated graphics (6th gen or newer recommended)
+  - Works great with Intel NUC, N100/N95 mini PCs, and other Intel-based hardware
+developer: agent932
+website: https://github.com/agent932/intel-gpu-monitor-umbrel
+dependencies: []
+repo: https://github.com/agent932/intel-gpu-monitor-umbrel
+support: https://github.com/agent932/intel-gpu-monitor-umbrel/issues
+port: 8847
+gallery: []
+path: ""
+defaultUsername: ""
+defaultPassword: ""
+widgets:
+  - id: "stats"
+    type: "four-stats"
+    refresh: "2s"
+    endpoint: "widget-server:80/widgets/gpu"
+    link: ""
+    example:
+      items:
+        - title: "GPU Usage"
+          text: "42.5"
+          subtext: "%"
+        - title: "Frequency"
+          text: "2100"
+          subtext: "MHz"
+        - title: "Power"
+          text: "85.2"
+          subtext: "W"
+        - title: "RC6 Idle"
+          text: "57.5"
+          subtext: "%"
+submitter: agent932
+submission: https://github.com/getumbrel/umbrel-apps/pull/TBD
+releaseNotes: ""
