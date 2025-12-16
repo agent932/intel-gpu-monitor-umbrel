@@ -51,7 +51,7 @@ widgets:
   - id: "stats"
     type: "four-stats"
     refresh: "2s"
-    endpoint: "donmon-appstore-intel-gpu-monitor_web_1:8847/widgets/gpu"
+    endpoint: "http://donmon-appstore-intel-gpu-monitor_web_1:8847/widgets/gpu"
     link: ""
     example:
       type: "four-stats"
