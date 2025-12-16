@@ -8,7 +8,7 @@ services:
     restart: on-failure
     stop_grace_period: 1m
     ports:
-      - "${APP_INTEL_GPU_MONITOR_PORT:-8847}:8847"
+      - ${APP_DONMON_APPSTORE_INTEL_GPU_MONITOR_PORT:-8847}:8847
     environment:
       - NODE_ENV=production
       - PORT=8847

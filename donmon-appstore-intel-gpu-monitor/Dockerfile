@@ -1,10 +1,12 @@
-FROM node:18-alpine
+FROM node:18-slim
 
 # Install Intel GPU Top utility and dependencies
-RUN apk add --no-cache \
+# intel-gpu-tools package contains intel_gpu_top command
+RUN apt-get update && apt-get install -y \
     intel-gpu-tools \
-    libdrm \
-    libpciaccess
+    libdrm2 \
+    libpciaccess0 \
+    && rm -rf /var/lib/apt/lists/*
 
 # Create app directory
 WORKDIR /app
