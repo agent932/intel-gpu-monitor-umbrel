@@ -174,9 +174,14 @@ wss.on('connection', function(ws) {
 // UMBREL WIDGET API ENDPOINT
 // =====================================================
 app.get('/widgets/gpu', function(req, res) {
+    console.log('[WIDGET] Request received at', new Date().toISOString());
+    console.log('[WIDGET] GPU Available:', isGpuAvailable);
+    console.log('[WIDGET] Has latest data:', !!latestGpuData);
+    
     if (!isGpuAvailable || !latestGpuData || !latestGpuData.data) {
         // Return placeholder data when GPU is not available
         // Umbrel widgets ONLY return 'items' - type and refresh are defined in umbrel-app.yml
+        console.log('[WIDGET] Returning placeholder data');
         return res.json({
             items: [
                 { title: 'GPU Usage', text: '--', subtext: '%' },
@@ -210,15 +215,17 @@ app.get('/widgets/gpu', function(req, res) {
     var gpuPower = power.GPU || 0;
     var rc6Percent = rc6.value || 0;
 
-    // Umbrel widgets ONLY return 'items' - type and refresh are defined in umbrel-app.yml
-    res.json({
+    var widgetData = {
         items: [
             { title: 'GPU Usage', text: gpuBusy.toFixed(1), subtext: '%' },
             { title: 'Frequency', text: actualFreq.toFixed(0), subtext: 'MHz' },
             { title: 'Power', text: gpuPower.toFixed(1), subtext: 'W' },
             { title: 'RC6 Idle', text: rc6Percent.toFixed(1), subtext: '%' }
         ]
-    });
+    };
+    
+    console.log('[WIDGET] Returning data:', JSON.stringify(widgetData));
+    res.json(widgetData);
 });
 
 // Health check endpoint
