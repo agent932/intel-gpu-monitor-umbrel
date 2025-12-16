@@ -7,6 +7,7 @@ RUN apt-get update && apt-get install -y \
     libdrm2 \
     libpciaccess0 \
     procps \
+    lsof \
     && rm -rf /var/lib/apt/lists/*
 
 # Create app directory
