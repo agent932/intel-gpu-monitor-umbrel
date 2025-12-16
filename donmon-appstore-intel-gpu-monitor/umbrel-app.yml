@@ -1,5 +1,5 @@
 manifestVersion: 1
-id: donmon-intel-gpu-monitor
+id: donmon-appstore-intel-gpu-monitor
 category: developer
 name: Intel GPU Monitor
 version: "1.1.0"
@@ -51,7 +51,7 @@ widgets:
   - id: "stats"
     type: "four-stats"
     refresh: "2s"
-    endpoint: "donmon-intel-gpu-monitor_web_1:8847/widgets/gpu"
+    endpoint: "donmon-appstore-intel-gpu-monitor_web_1:8847/widgets/gpu"
     link: ""
     example:
       type: "four-stats"
