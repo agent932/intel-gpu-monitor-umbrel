@@ -52,29 +52,10 @@ function startGpuMonitor() {
     }
 
     console.log('Spawning intel_gpu_top process...');
-    
-    // First, test if intel_gpu_top works at all
-    console.log('Testing intel_gpu_top command...');
-    var testProcess = spawn('intel_gpu_top', ['--help']);
-    
-    testProcess.on('error', function(err) {
-        console.error('intel_gpu_top command not found or cannot execute:', err.message);
-    });
-    
-    testProcess.stderr.on('data', function(data) {
-        console.log('intel_gpu_top test stderr:', data.toString());
-    });
-    
-    testProcess.on('close', function(code) {
-        console.log('intel_gpu_top test exited with code:', code);
-    });
-    
     // Run intel_gpu_top with JSON output, updating every second
     gpuProcess = spawn('intel_gpu_top', ['-J', '-s', '1000'], {
         stdio: ['pipe', 'pipe', 'pipe']
     });
-    
-    console.log('intel_gpu_top process spawned with PID:', gpuProcess.pid);
 
     let buffer = '';
     let braceCount = 0;
@@ -82,7 +63,6 @@ function startGpuMonitor() {
     let jsonStart = 0;
 
     gpuProcess.stdout.on('data', function(data) {
-        console.log('Received data from intel_gpu_top, length:', data.length);
         const chunk = data.toString();
         
         for (let i = 0; i < chunk.length; i++) {
@@ -142,16 +122,7 @@ function startGpuMonitor() {
         isGpuAvailable = false;
     });
 
-    // Check if we receive data within 5 seconds
-    var dataTimeout = setTimeout(function() {
-        if (!isGpuAvailable) {
-            console.error('WARNING: No data received from intel_gpu_top after 5 seconds');
-            console.error('This might indicate a permissions issue or the GPU is not accessible');
-        }
-    }, 5000);
-
     gpuProcess.on('close', function(code) {
-        clearTimeout(dataTimeout);
         console.log('intel_gpu_top exited with code ' + code);
         isGpuAvailable = false;
         
@@ -203,19 +174,10 @@ wss.on('connection', function(ws) {
 // UMBREL WIDGET API ENDPOINT
 // =====================================================
 app.get('/widgets/gpu', function(req, res) {
-    console.log('Widget endpoint called - isGpuAvailable:', isGpuAvailable, 'hasData:', !!latestGpuData);
-    
-    // Set CORS headers for Umbrel
-    res.setHeader('Access-Control-Allow-Origin', '*');
-    res.setHeader('Access-Control-Allow-Methods', 'GET');
-    res.setHeader('Content-Type', 'application/json');
-    
     if (!isGpuAvailable || !latestGpuData || !latestGpuData.data) {
         // Return placeholder data when GPU is not available
-        console.log('Returning placeholder data for widget');
+        // Umbrel widgets ONLY return 'items' - type and refresh are defined in umbrel-app.yml
         return res.json({
-            type: 'four-stats',
-            refresh: '5s',
             items: [
                 { title: 'GPU Usage', text: '--', subtext: '%' },
                 { title: 'Frequency', text: '--', subtext: 'MHz' },
@@ -248,22 +210,15 @@ app.get('/widgets/gpu', function(req, res) {
     var gpuPower = power.GPU || 0;
     var rc6Percent = rc6.value || 0;
 
-    console.log('Widget data:', { gpuBusy, actualFreq, gpuPower, rc6Percent });
-
-    // umbrelOS expects strings for all fields
-    var widgetResponse = {
-        type: 'four-stats',
-        refresh: '2s',
+    // Umbrel widgets ONLY return 'items' - type and refresh are defined in umbrel-app.yml
+    res.json({
         items: [
             { title: 'GPU Usage', text: gpuBusy.toFixed(1), subtext: '%' },
             { title: 'Frequency', text: actualFreq.toFixed(0), subtext: 'MHz' },
             { title: 'Power', text: gpuPower.toFixed(1), subtext: 'W' },
             { title: 'RC6 Idle', text: rc6Percent.toFixed(1), subtext: '%' }
         ]
-    };
-    
-    console.log('Sending widget response:', JSON.stringify(widgetResponse));
-    res.json(widgetResponse);
+    });
 });
 
 // Health check endpoint
