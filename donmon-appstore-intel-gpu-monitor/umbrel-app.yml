@@ -51,7 +51,7 @@ widgets:
   - id: "stats"
     type: "four-stats"
     refresh: "2s"
-    endpoint: "http://web:8847/widgets/gpu"
+    endpoint: "widget-server:80/widgets/gpu"
     link: ""
     example:
       type: "four-stats"

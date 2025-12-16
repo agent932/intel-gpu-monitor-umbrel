@@ -1,0 +1,24 @@
+FROM node:18-slim
+
+# Install intel-gpu-tools
+RUN apt-get update && \
+    apt-get install -y intel-gpu-tools && \
+    rm -rf /var/lib/apt/lists/*
+
+# Create app directory
+WORKDIR /app
+
+# Copy package files
+COPY package*.json ./
+
+# Install dependencies
+RUN npm ci --only=production
+
+# Copy widget server
+COPY widget-server.js .
+
+# Expose port 80 (widget server standard port)
+EXPOSE 80
+
+# Run widget server
+CMD ["node", "widget-server.js"]
