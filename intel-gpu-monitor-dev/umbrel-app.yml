@@ -1,47 +1,36 @@
 manifestVersion: 1
 id: donmon-appstore-intel-gpu-monitor
-category: developer
+category: utilities
 name: Intel GPU Monitor
-version: "1.1.0"
-tagline: Real-time Intel Arc GPU monitoring dashboard
+version: "1.0.0"
+tagline: Real-time Intel GPU monitoring for your home server
 description: >-
-  Intel GPU Monitor provides a real-time web dashboard for monitoring your Intel Arc GPU
-  using intel_gpu_top. Track GPU utilization, render engine usage, video encode/decode
-  activity, power consumption, and more.
+  Intel GPU Monitor provides real-time monitoring of Intel integrated GPUs for Umbrel.
+  Perfect for seeing which apps are using hardware acceleration and monitoring GPU
+  performance on Intel-based home servers.
 
 
-  Perfect for monitoring Intel Arc A380, A750, A770, and other Intel discrete GPUs
-  on your Umbrel server.
+  Track GPU usage, frequency, power consumption, and see exactly which apps
+  (like Plex or Jellyfin) are using your GPU for hardware transcoding.
 
 
   Features:
-
-  - Real-time GPU utilization metrics
-
-  - Render engine activity monitoring
-
-  - Video encode/decode engine stats
-
-  - Power consumption tracking
-
-  - Memory usage statistics
-
-  - Clean, responsive web interface
-
-  - Auto-refreshing dashboard
-
-  - Homepage widget support
+  - Real-time GPU metrics (usage, frequency, power)
+  - Per-engine breakdown (Video decode/encode, Render/3D, Blitter)
+  - Process detection - see which apps are using GPU
+  - Automatic app recognition (Plex, Jellyfin, Emby, etc.)
+  - Beautiful web dashboard with live updates
+  - Umbrel homepage widget support
 
 
-  ⚠️ REQUIREMENTS:
-
-  Your Umbrel server must have an Intel Arc GPU installed with the appropriate drivers.
-  The container requires privileged access for GPU monitoring.
-developer: DonMon
-website: https://github.com/donmon
+  Requirements:
+  - Intel CPU with integrated graphics (6th gen or newer recommended)
+  - Works great with Intel NUC, N100/N95 mini PCs, and other Intel-based hardware
+developer: agent932
+website: https://github.com/agent932/intel-gpu-monitor-umbrel
 dependencies: []
-repo: https://github.com/donmon/intel-gpu-monitor
-support: https://github.com/donmon/intel-gpu-monitor/issues
+repo: https://github.com/agent932/intel-gpu-monitor-umbrel
+support: https://github.com/agent932/intel-gpu-monitor-umbrel/issues
 port: 8847
 gallery: []
 path: ""
@@ -51,7 +40,7 @@ widgets:
   - id: "stats"
     type: "four-stats"
     refresh: "2s"
-    endpoint: "widget-server:80/widgets/gpu"
+    endpoint: "widget-server/widgets/gpu"
     link: ""
     example:
       items:
@@ -67,13 +56,12 @@ widgets:
         - title: "RC6 Idle"
           text: "57.5"
           subtext: "%"
-submitter: DonMon
-submission: https://github.com/donmon/intel-gpu-monitor
+submitter: agent932
+submission: https://github.com/agent932/intel-gpu-monitor-umbrel
 releaseNotes: >-
-  Version 1.1.0 - Added Umbrel homepage widget support!
+  Version 1.0.0 - Initial release
   
-  - New four-stats widget shows GPU usage, frequency, power, and idle state
-  
-  - Widget auto-refreshes every 2 seconds
-  
-  - Umbrel-styled dashboard interface
+  - Real-time GPU monitoring with intel_gpu_top
+  - Process detection to see which apps use GPU
+  - Homepage widget support
+  - Automatic app recognition (Plex, Jellyfin, Emby)
