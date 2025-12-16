@@ -4,7 +4,7 @@ on:
   push:
     branches: [ main ]
     paths:
-      - 'donmon-appstore-intel-gpu-monitor/**'
+      - 'intel-gpu-monitor-dev/**'
   workflow_dispatch:
 
 jobs:
@@ -28,8 +28,8 @@ jobs:
       - name: Build and push main Docker image
         uses: docker/build-push-action@v5
         with:
-          context: ./donmon-appstore-intel-gpu-monitor
-          file: ./donmon-appstore-intel-gpu-monitor/Dockerfile
+          context: ./intel-gpu-monitor-dev
+          file: ./intel-gpu-monitor-dev/Dockerfile
           push: true
           tags: |
             ghcr.io/${{ github.repository_owner }}/intel-gpu-monitor:latest
@@ -38,8 +38,8 @@ jobs:
       - name: Build and push widget server Docker image
         uses: docker/build-push-action@v5
         with:
-          context: ./donmon-appstore-intel-gpu-monitor
-          file: ./donmon-appstore-intel-gpu-monitor/Dockerfile.widget
+          context: ./intel-gpu-monitor-dev
+          file: ./intel-gpu-monitor-dev/Dockerfile.widget
           push: true
           tags: |
             ghcr.io/${{ github.repository_owner }}/intel-gpu-monitor-widget:latest
