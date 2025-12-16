@@ -682,6 +682,123 @@ function getHtmlPage() {
 '            letter-spacing: -0.02em;\n' +
 '        }\n' +
 '        \n' +
+'        .processes-section {\n' +
+'            margin-top: 24px;\n' +
+'            background: rgba(255, 255, 255, 0.03);\n' +
+'            border: 1px solid rgba(255, 255, 255, 0.08);\n' +
+'            border-radius: 16px;\n' +
+'            padding: 24px;\n' +
+'        }\n' +
+'        \n' +
+'        .processes-header {\n' +
+'            display: flex;\n' +
+'            align-items: center;\n' +
+'            gap: 12px;\n' +
+'            margin-bottom: 20px;\n' +
+'            padding-bottom: 16px;\n' +
+'            border-bottom: 1px solid rgba(255, 255, 255, 0.08);\n' +
+'        }\n' +
+'        \n' +
+'        .processes-header h2 {\n' +
+'            margin: 0;\n' +
+'            font-size: 18px;\n' +
+'            font-weight: 600;\n' +
+'            color: var(--text-primary);\n' +
+'        }\n' +
+'        \n' +
+'        .processes-count {\n' +
+'            background: rgba(0, 122, 255, 0.2);\n' +
+'            color: #0A84FF;\n' +
+'            padding: 4px 12px;\n' +
+'            border-radius: 12px;\n' +
+'            font-size: 12px;\n' +
+'            font-weight: 600;\n' +
+'        }\n' +
+'        \n' +
+'        .process-list {\n' +
+'            display: flex;\n' +
+'            flex-direction: column;\n' +
+'            gap: 12px;\n' +
+'        }\n' +
+'        \n' +
+'        .process-item {\n' +
+'            display: flex;\n' +
+'            align-items: center;\n' +
+'            gap: 16px;\n' +
+'            padding: 16px;\n' +
+'            background: rgba(255, 255, 255, 0.02);\n' +
+'            border: 1px solid rgba(255, 255, 255, 0.05);\n' +
+'            border-radius: 12px;\n' +
+'            transition: all 0.2s;\n' +
+'        }\n' +
+'        \n' +
+'        .process-item:hover {\n' +
+'            background: rgba(255, 255, 255, 0.05);\n' +
+'            border-color: rgba(255, 255, 255, 0.1);\n' +
+'        }\n' +
+'        \n' +
+'        .process-icon {\n' +
+'            width: 48px;\n' +
+'            height: 48px;\n' +
+'            border-radius: 12px;\n' +
+'            display: flex;\n' +
+'            align-items: center;\n' +
+'            justify-content: center;\n' +
+'            flex-shrink: 0;\n' +
+'            background: rgba(255, 255, 255, 0.05);\n' +
+'            overflow: hidden;\n' +
+'        }\n' +
+'        \n' +
+'        .process-icon img {\n' +
+'            width: 100%;\n' +
+'            height: 100%;\n' +
+'            object-fit: cover;\n' +
+'        }\n' +
+'        \n' +
+'        .process-icon svg {\n' +
+'            width: 24px;\n' +
+'            height: 24px;\n' +
+'            color: var(--text-secondary);\n' +
+'        }\n' +
+'        \n' +
+'        .process-info {\n' +
+'            flex: 1;\n' +
+'            min-width: 0;\n' +
+'        }\n' +
+'        \n' +
+'        .process-name {\n' +
+'            font-size: 15px;\n' +
+'            font-weight: 600;\n' +
+'            color: var(--text-primary);\n' +
+'            margin-bottom: 4px;\n' +
+'        }\n' +
+'        \n' +
+'        .process-details {\n' +
+'            font-size: 13px;\n' +
+'            color: var(--text-secondary);\n' +
+'            font-family: "SF Mono", Monaco, monospace;\n' +
+'            overflow: hidden;\n' +
+'            text-overflow: ellipsis;\n' +
+'            white-space: nowrap;\n' +
+'        }\n' +
+'        \n' +
+'        .process-pid {\n' +
+'            background: rgba(255, 255, 255, 0.05);\n' +
+'            padding: 6px 12px;\n' +
+'            border-radius: 8px;\n' +
+'            font-size: 12px;\n' +
+'            font-weight: 600;\n' +
+'            color: var(--text-tertiary);\n' +
+'            font-family: "SF Mono", Monaco, monospace;\n' +
+'        }\n' +
+'        \n' +
+'        .no-processes {\n' +
+'            text-align: center;\n' +
+'            padding: 32px;\n' +
+'            color: var(--text-secondary);\n' +
+'            font-size: 14px;\n' +
+'        }\n' +
+'        \n' +
 '        @media (max-width: 768px) {\n' +
 '            body { padding: 16px; }\n' +
 '            h1 { font-size: 20px; }\n' +
@@ -733,6 +850,70 @@ function getHtmlPage() {
 '        var ws;\n' +
 '        var reconnectInterval;\n' +
 '        var rawVisible = false;\n' +
+'        \n' +
+'        // Map process names/commands to Umbrel apps\n' +
+'        function mapProcessToUmbrelApp(process) {\n' +
+'            var name = process.name.toLowerCase();\n' +
+'            var command = process.command.toLowerCase();\n' +
+'            \n' +
+'            // Common Umbrel apps mapping\n' +
+'            var appMappings = [\n' +
+'                { keywords: ["plex", "plexmediaserver"], app: "Plex", icon: "https://getumbrel.github.io/umbrel-apps-gallery/plex/icon.svg" },\n' +
+'                { keywords: ["jellyfin"], app: "Jellyfin", icon: "https://getumbrel.github.io/umbrel-apps-gallery/jellyfin/icon.svg" },\n' +
+'                { keywords: ["emby"], app: "Emby", icon: "https://getumbrel.github.io/umbrel-apps-gallery/emby/icon.svg" },\n' +
+'                { keywords: ["immich"], app: "Immich", icon: "https://getumbrel.github.io/umbrel-apps-gallery/immich/icon.svg" },\n' +
+'                { keywords: ["photoprism"], app: "PhotoPrism", icon: "https://getumbrel.github.io/umbrel-apps-gallery/photoprism/icon.svg" },\n' +
+'                { keywords: ["frigate"], app: "Frigate", icon: "https://getumbrel.github.io/umbrel-apps-gallery/frigate/icon.svg" },\n' +
+'                { keywords: ["handbrake"], app: "HandBrake", icon: "https://getumbrel.github.io/umbrel-apps-gallery/handbrake/icon.svg" },\n' +
+'                { keywords: ["tdarr"], app: "Tdarr", icon: "https://getumbrel.github.io/umbrel-apps-gallery/tdarr/icon.svg" },\n' +
+'                { keywords: ["ffmpeg"], app: "FFmpeg", icon: null },\n' +
+'                { keywords: ["intel_gpu_top"], app: "Intel GPU Monitor", icon: null },\n' +
+'                { keywords: ["chrome", "chromium"], app: "Chrome", icon: null },\n' +
+'                { keywords: ["firefox"], app: "Firefox", icon: null }\n' +
+'            ];\n' +
+'            \n' +
+'            for (var i = 0; i < appMappings.length; i++) {\n' +
+'                var mapping = appMappings[i];\n' +
+'                for (var j = 0; j < mapping.keywords.length; j++) {\n' +
+'                    if (name.includes(mapping.keywords[j]) || command.includes(mapping.keywords[j])) {\n' +
+'                        return { name: mapping.app, icon: mapping.icon };\n' +
+'                    }\n' +
+'                }\n' +
+'            }\n' +
+'            \n' +
+'            // Default to process name\n' +
+'            return { name: process.name, icon: null };\n' +
+'        }\n' +
+'        \n' +
+'        function renderProcesses(processes) {\n' +
+'            if (!processes || processes.length === 0) {\n' +
+'                return \'<div class="no-processes">No other applications currently using the GPU</div>\';\n' +
+'            }\n' +
+'            \n' +
+'            var html = \'<div class="process-list">\';\n' +
+'            for (var i = 0; i < processes.length; i++) {\n' +
+'                var process = processes[i];\n' +
+'                var appInfo = mapProcessToUmbrelApp(process);\n' +
+'                \n' +
+'                var iconHtml;\n' +
+'                if (appInfo.icon) {\n' +
+'                    iconHtml = \'<img src="\' + appInfo.icon + \'" alt="\' + appInfo.name + \'" onerror="this.style.display=\\\'none\\\'">\';\n' +
+'                } else {\n' +
+'                    iconHtml = \'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8"/><path d="M12 17v4"/></svg>\';\n' +
+'                }\n' +
+'                \n' +
+'                html += \'<div class="process-item">\' +\n' +
+'                    \'<div class="process-icon">\' + iconHtml + \'</div>\' +\n' +
+'                    \'<div class="process-info">\' +\n' +
+'                        \'<div class="process-name">\' + appInfo.name + \'</div>\' +\n' +
+'                        \'<div class="process-details">\' + process.command + \'</div>\' +\n' +
+'                    \'</div>\' +\n' +
+'                    \'<div class="process-pid">PID: \' + process.pid + \'</div>\' +\n' +
+'                \'</div>\';\n' +
+'            }\n' +
+'            html += \'</div>\';\n' +
+'            return html;\n' +
+'        }\n' +
 '        \n' +
 '        function toggleRaw() {\n' +
 '            rawVisible = !rawVisible;\n' +
@@ -857,6 +1038,14 @@ function getHtmlPage() {
 '                \n' +
 '                \'<div class="card"><div class="card-header"><div class="card-icon cyan">\' + iconAll + \'</div><span class="card-title">All Engines</span></div>\' +\n' +
 '                \'<div class="engines-grid">\' + engineItemsHtml + \'</div></div>\' +\n' +
+'                \'</div>\' +\n' +
+'                \n' +
+'                \'<div class="processes-section">\' +\n' +
+'                    \'<div class="processes-header">\' +\n' +
+'                        \'<h2>GPU Applications</h2>\' +\n' +
+'                        \'<span class="processes-count">\' + (message.processes ? message.processes.length : 0) + \' active</span>\' +\n' +
+'                    \'</div>\' +\n' +
+'                    renderProcesses(message.processes) +\n' +
 '                \'</div>\';\n' +
 '        }\n' +
 '        \n' +
