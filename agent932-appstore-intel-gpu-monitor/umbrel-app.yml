@@ -1,5 +1,5 @@
 manifestVersion: 1
-id: intel-gpu-monitor
+id: agent932-appstore-intel-gpu-monitor
 category: utilities
 name: Intel GPU Monitor
 version: "1.0.0"

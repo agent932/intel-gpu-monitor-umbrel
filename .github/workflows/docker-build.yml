@@ -4,7 +4,7 @@ on:
   push:
     branches: [ main ]
     paths:
-      - 'intel-gpu-monitor/**'
+      - 'agent932-appstore-intel-gpu-monitor/**'
   workflow_dispatch:
 
 jobs:
@@ -28,8 +28,8 @@ jobs:
       - name: Build and push main Docker image
         uses: docker/build-push-action@v5
         with:
-          context: ./intel-gpu-monitor
-          file: ./intel-gpu-monitor/Dockerfile
+          context: ./agent932-appstore-intel-gpu-monitor
+          file: ./agent932-appstore-intel-gpu-monitor/Dockerfile
           push: true
           tags: |
             ghcr.io/${{ github.repository_owner }}/intel-gpu-monitor:latest
@@ -38,8 +38,8 @@ jobs:
       - name: Build and push widget server Docker image
         uses: docker/build-push-action@v5
         with:
-          context: ./intel-gpu-monitor
-          file: ./intel-gpu-monitor/Dockerfile.widget
+          context: ./agent932-appstore-intel-gpu-monitor
+          file: ./agent932-appstore-intel-gpu-monitor/Dockerfile.widget
           push: true
           tags: |
             ghcr.io/${{ github.repository_owner }}/intel-gpu-monitor-widget:latest
