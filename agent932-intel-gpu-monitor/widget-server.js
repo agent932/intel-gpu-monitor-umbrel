@@ -151,6 +151,8 @@ app.get('/widgets/gpu', function(req, res) {
         // Return placeholder data when GPU is not available
         console.log('[WIDGET] Returning placeholder data');
         const placeholderData = {
+            type: 'four-stats',
+            link: '',
             items: [
                 { title: 'GPU Usage', text: '--', subtext: '%' },
                 { title: 'Frequency', text: '--', subtext: 'MHz' },
@@ -192,6 +194,8 @@ app.get('/widgets/gpu', function(req, res) {
     var rc6Percent = rc6.value || 0;
 
     var widgetData = {
+        type: 'four-stats',
+        link: '',
         items: [
             { title: 'GPU Usage', text: gpuBusy != null ? gpuBusy.toFixed(1) : '--', subtext: '%' },
             { title: 'Frequency', text: actualFreq != null ? actualFreq.toFixed(0) : '--', subtext: 'MHz' },
