@@ -1,5 +1,5 @@
 manifestVersion: 1
-id: donmon-appstore-intel-gpu-monitor
+id: intel-gpu-monitor
 category: utilities
 name: Intel GPU Monitor
 version: "1.0.0"
@@ -57,11 +57,5 @@ widgets:
           text: "57.5"
           subtext: "%"
 submitter: agent932
-submission: https://github.com/agent932/intel-gpu-monitor-umbrel
-releaseNotes: >-
-  Version 1.0.0 - Initial release
-  
-  - Real-time GPU monitoring with intel_gpu_top
-  - Process detection to see which apps use GPU
-  - Homepage widget support
-  - Automatic app recognition (Plex, Jellyfin, Emby)
+submission: https://github.com/getumbrel/umbrel-apps/pull/TBD
+releaseNotes: ""
