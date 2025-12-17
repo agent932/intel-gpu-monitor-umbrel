@@ -3,11 +3,11 @@ version: "3.7"
 services:
   app_proxy:
     environment:
-      APP_HOST: intel-gpu-monitor_web_1
+      APP_HOST: donmon-appstore-intel-gpu-monitor_web_1
       APP_PORT: 8847
 
   web:
-    image: ghcr.io/agent932/intel-gpu-monitor:latest
+    image: ghcr.io/agent932/intel-gpu-monitor:latest@sha256:147c64ed4bfd9fc42096cf26951394e937c853365e20e1b6e0def973c2718607
     restart: on-failure
     stop_grace_period: 1m
     ports:
@@ -23,7 +23,7 @@ services:
       - /sys/kernel/debug:/sys/kernel/debug:ro
 
   widget-server:
-    image: ghcr.io/agent932/intel-gpu-monitor-widget:latest
+    image: ghcr.io/agent932/intel-gpu-monitor-widget:latest@sha256:94e74d364c4896150f8464b3622c5f837fdf3990b1f8cfb84f0c7622d0a27c4b
     restart: on-failure
     environment:
       - NODE_ENV=production
