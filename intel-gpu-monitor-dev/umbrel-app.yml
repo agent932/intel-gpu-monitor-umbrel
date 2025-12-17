@@ -40,7 +40,7 @@ widgets:
   - id: "stats"
     type: "four-stats"
     refresh: "2s"
-    endpoint: "widget-server/widgets/gpu"
+    endpoint: "widget-server:80/widgets/gpu"
     link: ""
     example:
       items:

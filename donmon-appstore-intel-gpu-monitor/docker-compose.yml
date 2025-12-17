@@ -1,0 +1,33 @@
+version: "3.7"
+
+services:
+  app_proxy:
+    environment:
+      APP_HOST: intel-gpu-monitor_web_1
+      APP_PORT: 8847
+
+  web:
+    image: ghcr.io/agent932/intel-gpu-monitor:latest
+    restart: on-failure
+    stop_grace_period: 1m
+    ports:
+      - ${APP_DONMON_APPSTORE_INTEL_GPU_MONITOR_PORT:-8847}:8847
+    environment:
+      - NODE_ENV=production
+      - PORT=8847
+    privileged: true
+    devices:
+      - /dev/dri:/dev/dri
+    volumes:
+      - ${APP_DATA_DIR}/data:/data
+      - /sys/kernel/debug:/sys/kernel/debug:ro
+
+  widget-server:
+    image: ghcr.io/agent932/intel-gpu-monitor-widget:latest
+    restart: on-failure
+    environment:
+      - NODE_ENV=production
+      - PORT=80
+    privileged: true
+    devices:
+      - /dev/dri:/dev/dri
