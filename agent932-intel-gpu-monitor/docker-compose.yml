@@ -3,7 +3,7 @@ version: "3.7"
 services:
   app_proxy:
     environment:
-      APP_HOST: agent932-appstore-intel-gpu-monitor_web_1
+      APP_HOST: agent932-intel-gpu-monitor_web_1
       APP_PORT: 8847
 
   web:
@@ -11,7 +11,7 @@ services:
     restart: on-failure
     stop_grace_period: 1m
     ports:
-      - ${APP_AGENT932_APPSTORE_INTEL_GPU_MONITOR_PORT:-8847}:8847
+      - ${APP_AGENT932_INTEL_GPU_MONITOR_PORT:-8847}:8847
     environment:
       - NODE_ENV=production
       - PORT=8847
