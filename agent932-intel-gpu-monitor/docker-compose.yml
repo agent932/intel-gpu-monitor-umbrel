@@ -10,8 +10,7 @@ services:
     image: ghcr.io/agent932/intel-gpu-monitor:latest
     restart: on-failure
     stop_grace_period: 1m
-    ports:
-      - ${APP_AGENT932_INTEL_GPU_MONITOR_PORT:-8847}:8847
+    # ports section removed; only app_proxy binds host port
     environment:
       - NODE_ENV=production
       - PORT=8847
