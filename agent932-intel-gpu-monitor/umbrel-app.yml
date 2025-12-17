@@ -32,6 +32,7 @@ dependencies: []
 repo: https://github.com/agent932/intel-gpu-monitor-umbrel
 support: https://github.com/agent932/intel-gpu-monitor-umbrel/issues
 port: 8850
+port: 8847
 gallery: []
 path: ""
 defaultUsername: ""

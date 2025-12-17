@@ -4,17 +4,17 @@ services:
   app_proxy:
     environment:
       APP_HOST: agent932-intel-gpu-monitor_web_1
-      APP_PORT: 8850
+      APP_PORT: 8847
 
   web:
     image: ghcr.io/agent932/intel-gpu-monitor:latest
     restart: on-failure
     stop_grace_period: 1m
     ports:
-      - ${APP_AGENT932_INTEL_GPU_MONITOR_PORT:-8850}:8850
+      - ${APP_AGENT932_INTEL_GPU_MONITOR_PORT:-8847}:8847
     environment:
       - NODE_ENV=production
-      - PORT=8850
+      - PORT=8847
     privileged: true
     devices:
       - /dev/dri:/dev/dri
