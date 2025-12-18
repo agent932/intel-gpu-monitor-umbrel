@@ -33,7 +33,12 @@ app.get('/widgets/gpu', async function(req, res) {
 
         if (!gpuData.available || !gpuData.data) {
             console.log('[WIDGET] GPU not available, returning placeholder');
-            return res.json({ text: 'GPU: --' });
+            return res.json({
+                type: 'text',
+                refresh: '5s',
+                link: '',
+                text: 'GPU: --'
+            });
         }
 
         const data = gpuData.data;
@@ -53,6 +58,9 @@ app.get('/widgets/gpu', async function(req, res) {
         gpuBusy = engineCount > 0 ? (gpuBusy / engineCount) : 0;
 
         const widgetData = {
+            type: 'text',
+            refresh: '5s',
+            link: '',
             text: 'GPU: ' + gpuBusy.toFixed(1) + '%'
         };
 
@@ -61,7 +69,12 @@ app.get('/widgets/gpu', async function(req, res) {
 
     } catch (error) {
         console.error('[WIDGET] Error fetching from main server:', error.message);
-        res.json({ text: 'GPU: ERR' });
+        res.json({
+            type: 'text',
+            refresh: '5s',
+            link: '',
+            text: 'GPU: ERR'
+        });
     }
 });
 
