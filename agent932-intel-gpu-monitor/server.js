@@ -5,6 +5,7 @@ const http = require('http');
 const path = require('path');
 const fs = require('fs');
 const { promisify } = require('util');
+const axios = require('axios');
 
 const execAsync = promisify(exec);
 
@@ -813,10 +814,7 @@ function getHtmlPage() {
 '        <header>\n' +
 '            <div class="header-content">\n' +
 '                <div class="app-icon">\n' +
-'                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">\n' +
-'                        <rect x="4" y="4" width="16" height="16" rx="2"/>\n' +
-'                        <path d="M9 9h6v6H9z"/>\n' +
-'                    </svg>\n' +
+'                    <img src="/assets/agent932-intel-gpu-monitor.png" alt="Intel GPU Monitor Icon" style="width:40px;height:40px;"/>\n' +
 '                </div>\n' +
 '                <h1>Intel GPU Monitor</h1>\n' +
 '            </div>\n' +

@@ -3,6 +3,7 @@ id: agent932-intel-gpu-monitor
 category: utilities
 name: Intel GPU Monitor
 version: "1.0.0"
+icon: https://raw.githubusercontent.com/agent932/intel-gpu-monitor-umbrel/main/agent932-intel-gpu-monitor/assets/agent932-intel-gpu-monitor.png
 tagline: Real-time Intel GPU monitoring for your home server
 icon: https://raw.githubusercontent.com/agent932/intel-gpu-monitor-umbrel/refs/heads/main/agent932-intel-gpu-monitor/assets/agent932-intel-gpu-monitor.svg
 description: >-
