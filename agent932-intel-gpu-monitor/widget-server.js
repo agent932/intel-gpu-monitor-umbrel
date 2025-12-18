@@ -151,19 +151,8 @@ app.get('/widgets/gpu', function(req, res) {
         // Return placeholder data when GPU is not available
         console.log('[WIDGET] Returning placeholder data');
         const placeholderData = {
-            items: [
-                { title: 'GPU Usage', text: '--', subtext: '%' },
-                { title: 'Frequency', text: '--', subtext: 'MHz' },
-                { title: 'Power', text: '--', subtext: 'W' },
-                { title: 'RC6 Idle', text: '--', subtext: '%' }
-            ]
+            text: 'GPU: --'
         };
-        // Ensure all fields are non-empty strings
-        placeholderData.items = placeholderData.items.map(item => ({
-            title: String(item.title || '--'),
-            text: String(item.text || '--'),
-            subtext: String(item.subtext || '--')
-        }));
         console.log('[WIDGET] Placeholder response:', JSON.stringify(placeholderData, null, 2));
         return res.json(placeholderData);
     }
@@ -192,24 +181,9 @@ app.get('/widgets/gpu', function(req, res) {
     var rc6Percent = rc6.value || 0;
 
     var widgetData = {
-        items: [
-            { title: 'GPU Usage', text: gpuBusy != null ? gpuBusy.toFixed(1) : '--', subtext: '%' },
-            { title: 'Frequency', text: actualFreq != null ? actualFreq.toFixed(0) : '--', subtext: 'MHz' },
-            { title: 'Power', text: gpuPower != null ? gpuPower.toFixed(1) : '--', subtext: 'W' },
-            { title: 'RC6 Idle', text: rc6Percent != null ? rc6Percent.toFixed(1) : '--', subtext: '%' }
-        ]
+        text: 'GPU: ' + gpuBusy.toFixed(1) + '%'
     };
-    // Ensure all fields are non-empty strings
-    widgetData.items = widgetData.items.map(item => ({
-        title: String(item.title || '--'),
-        text: String(item.text || '--'),
-        subtext: String(item.subtext || '--')
-    }));
-    console.log('[WIDGET] Calculated values:');
-    console.log('[WIDGET]   GPU Busy:', gpuBusy != null ? gpuBusy.toFixed(1) : '--', '% (from', engineCount, 'engines)');
-    console.log('[WIDGET]   Frequency:', actualFreq != null ? actualFreq.toFixed(0) : '--', 'MHz');
-    console.log('[WIDGET]   Power:', gpuPower != null ? gpuPower.toFixed(1) : '--', 'W');
-    console.log('[WIDGET]   RC6:', rc6Percent != null ? rc6Percent.toFixed(1) : '--', '%');
+    console.log('[WIDGET] GPU Usage:', gpuBusy.toFixed(1), '%');
     console.log('[WIDGET] Final response:', JSON.stringify(widgetData, null, 2));
     console.log('[WIDGET] ================================================');
     res.json(widgetData);

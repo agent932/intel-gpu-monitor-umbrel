@@ -39,26 +39,11 @@ defaultUsername: ""
 defaultPassword: ""
 widgets:
   - id: "stats"
-    type: "four-stats"
-    refresh: "2s"
+    type: "text"
+    refresh: 5000
     endpoint: "widget-server:80/widgets/gpu"
-    link: ""
     example:
-      type: "four-stats"
-      link: ""
-      items:
-        - title: "GPU Usage"
-          text: "42.5"
-          subtext: "%"
-        - title: "Frequency"
-          text: "2100"
-          subtext: "MHz"
-        - title: "Power"
-          text: "85.2"
-          subtext: "W"
-        - title: "RC6 Idle"
-          text: "57.5"
-          subtext: "%"
+      text: "GPU: 42.5%"
 submitter: agent932
 submission: https://github.com/getumbrel/umbrel-apps/pull/TBD
 releaseNotes: ""
