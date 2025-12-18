@@ -4,7 +4,7 @@ category: utilities
 name: Intel GPU Monitor
 version: "1.0.0"
 tagline: Real-time Intel GPU monitoring for your home server
-icon: https://raw.githubusercontent.com/agent932/intel-gpu-monitor-umbrel/refs/heads/main/agent932-intel-gpu-monitor/assets/agent932-intel-gpu-monitor.png
+icon: https://raw.githubusercontent.com/agent932/intel-gpu-monitor-umbrel/refs/heads/main/agent932-intel-gpu-monitor/assets/agent932-intel-gpu-monitor.svg
 description: >-
   Intel GPU Monitor provides real-time monitoring of Intel integrated GPUs for Umbrel.
   Perfect for seeing which apps are using hardware acceleration and monitoring GPU
