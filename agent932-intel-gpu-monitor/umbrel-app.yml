@@ -1,4 +1,4 @@
-manifestVersion: 1
+manifestVersion: 1.1
 id: agent932-intel-gpu-monitor
 category: utilities
 name: Intel GPU Monitor
@@ -36,7 +36,10 @@ port: 8847
 widgets:
   - id: "stats"
     type: "text"
-    refresh: 5000
+    refresh: "5s"
     endpoint: "widget-server:80/widgets/gpu"
+    link: ""
     example:
+      type: "text"
+      link: ""
       text: "GPU: 42.5%"
