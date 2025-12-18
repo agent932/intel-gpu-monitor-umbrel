@@ -37,7 +37,7 @@ widgets:
   - id: "stats"
     type: "text"
     refresh: "5s"
-    endpoint: "widget-server:80/widgets/gpu"
+    endpoint: "widget-server/widgets/gpu"
     link: ""
     example:
       type: "text"

@@ -27,6 +27,3 @@ services:
     environment:
       - NODE_ENV=production
       - PORT=80
-    privileged: true
-    devices:
-      - /dev/dri:/dev/dri
