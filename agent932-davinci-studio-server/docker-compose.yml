@@ -15,7 +15,7 @@ services:
     environment:
       - TZ=${TZ:-Europe/London}
     volumes:
-      - ./data/hooks:/var/studio-server/hooks
-      - ./data/database:/var/studio-server/database
-      - ./data/backups:/var/studio-server/backups
-      - ./data/jobs:/etc/cron.d
+      - ${APP_DATA_DIR}/data/hooks:/var/studio-server/hooks
+      - ${APP_DATA_DIR}/data/database:/var/studio-server/database
+      - ${APP_DATA_DIR}/data/backups:/var/studio-server/backups
+      - ${APP_DATA_DIR}/data/jobs:/etc/cron.d
