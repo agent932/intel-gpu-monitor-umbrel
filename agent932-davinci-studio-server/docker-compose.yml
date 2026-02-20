@@ -4,7 +4,7 @@ services:
   app_proxy:
     environment:
       APP_HOST: agent932-davinci-studio-server_studio_1
-      APP_PORT: 8545
+      APP_PORT: 8543
 
   studio:
     image: allebb/studio-server:latest@sha256:b96c9cc9f665a7075b962f88b83309a95598218d48a78f8eb88a7065900db0ec
