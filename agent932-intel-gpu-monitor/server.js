@@ -5,11 +5,17 @@ const http = require('http');
 const path = require('path');
 const fs = require('fs');
 const { promisify } = require('util');
+const axios = require('axios');
 
 const execAsync = promisify(exec);
 
 const app = express();
 const PORT = process.env.PORT || 8847;
+
+// Plex configuration
+const PLEX_URL = process.env.PLEX_URL;
+const PLEX_TOKEN = process.env.PLEX_TOKEN;
+const PLEX_ENABLED = PLEX_URL && PLEX_TOKEN;
 
 // Log ALL incoming requests
 app.use((req, res, next) => {
@@ -129,10 +135,85 @@ async function getGpuProcesses() {
     }
 }
 
+// Get Plex sessions
+async function getPlexSessions() {
+    if (!PLEX_ENABLED) {
+        return [];
+    }
+
+    try {
+        const response = await axios.get(`${PLEX_URL}/status/sessions`, {
+            headers: {
+                'X-Plex-Token': PLEX_TOKEN,
+                'Accept': 'application/json'
+            },
+            timeout: 5000
+        });
+
+        const sessions = response.data.MediaContainer?.Metadata || [];
+        return sessions.map(session => ({
+            title: session.title || 'Unknown',
+            type: session.type || 'unknown',
+            user: session.User?.title || 'Unknown User',
+            player: session.Player?.title || 'Unknown Player',
+            state: session.Player?.state || 'unknown',
+            videoCodec: session.videoCodec || 'unknown',
+            audioCodec: session.audioCodec || 'unknown',
+            transcodeDecision: session.transcodeDecision || 'unknown',
+            width: session.width || 0,
+            height: session.height || 0,
+            bitrate: session.bitrate || 0
+        }));
+    } catch (error) {
+        console.error('Error fetching Plex sessions:', error.message);
+        return [];
+    }
+}
+
+// Get GPU processes with Plex session correlation
+async function getGpuProcessesWithPlex() {
+    const processes = await getGpuProcesses();
+    const plexSessions = await getPlexSessions();
+
+    // Correlate processes with Plex sessions
+    const enhancedProcesses = processes.map(process => {
+        let plexInfo = null;
+
+        // Check if this process is related to Plex transcoding
+        if (process.name.toLowerCase().includes('plex') ||
+            process.command.toLowerCase().includes('plex') ||
+            process.name.toLowerCase().includes('transcode') ||
+            process.name.toLowerCase().includes('ffmpeg')) {
+
+            // If we have active Plex sessions, assume GPU usage is for transcoding
+            if (plexSessions.length > 0) {
+                const activeSession = plexSessions.find(s => s.state === 'playing' || s.transcodeDecision === 'transcode');
+                if (activeSession) {
+                    plexInfo = {
+                        isTranscoding: true,
+                        session: activeSession
+                    };
+                }
+            }
+        }
+
+        return {
+            ...process,
+            plexInfo
+        };
+    });
+
+    return {
+        processes: enhancedProcesses,
+        plexSessions: plexSessions,
+        plexEnabled: PLEX_ENABLED
+    };
+}
+
 // Update GPU processes periodically
 async function updateGpuProcesses() {
     if (isGpuAvailable) {
-        latestGpuProcesses = await getGpuProcesses();
+        latestGpuProcesses = await getGpuProcessesWithPlex();
     }
 }
 
@@ -385,7 +466,8 @@ app.get('/api/gpu', function(req, res) {
     res.json({
         available: isGpuAvailable,
         timestamp: latestGpuData ? latestGpuData.timestamp : null,
-        data: latestGpuData ? latestGpuData.data : null
+        data: latestGpuData ? latestGpuData.data : null,
+        processes: latestGpuProcesses
     });
 });
 
@@ -799,6 +881,39 @@ function getHtmlPage() {
 '            font-size: 14px;\n' +
 '        }\n' +
 '        \n' +
+'        .plex-info {\n' +
+'            display: flex;\n' +
+'            align-items: center;\n' +
+'            gap: 12px;\n' +
+'            padding: 16px;\n' +
+'            background: rgba(83, 81, 251, 0.1);\n' +
+'            border: 1px solid rgba(83, 81, 251, 0.2);\n' +
+'            border-radius: 12px;\n' +
+'            margin-top: 16px;\n' +
+'        }\n' +
+'        \n' +
+'        .plex-icon {\n' +
+'            font-size: 20px;\n' +
+'            flex-shrink: 0;\n' +
+'        }\n' +
+'        \n' +
+'        .plex-details {\n' +
+'            font-size: 14px;\n' +
+'            color: var(--text-primary);\n' +
+'            font-weight: 500;\n' +
+'        }\n' +
+'        \n' +
+'        .plex-transcoding {\n' +
+'            font-size: 12px;\n' +
+'            color: var(--accent);\n' +
+'            font-weight: 600;\n' +
+'            margin-top: 4px;\n' +
+'            padding: 4px 8px;\n' +
+'            background: rgba(83, 81, 251, 0.1);\n' +
+'            border-radius: 6px;\n' +
+'            display: inline-block;\n' +
+'        }\n' +
+'        \n' +
 '        @media (max-width: 768px) {\n' +
 '            body { padding: 16px; }\n' +
 '            h1 { font-size: 20px; }\n' +
@@ -882,14 +997,23 @@ function getHtmlPage() {
 '            return { name: process.name, icon: null };\n' +
 '        }\n' +
 '        \n' +
-'        function renderProcesses(processes) {\n' +
-'            if (!processes || processes.length === 0) {\n' +
-'                return \'<div class="no-processes">No other applications currently using the GPU</div>\';\n' +
+'        function renderProcesses(processData) {\n' +
+'            if (!processData || !processData.processes || processData.processes.length === 0) {\n' +
+'                var html = \'<div class="no-processes">No other applications currently using the GPU</div>\';\n' +
+'                \n' +
+'                // Show Plex status if enabled\n' +
+'                if (processData && processData.plexEnabled && processData.plexSessions && processData.plexSessions.length > 0) {\n' +
+'                    html += \'<div class="plex-info"><div class="plex-icon">🎬</div><div class="plex-details">Plex connected - \' + processData.plexSessions.length + \' active session(s)</div></div>\';\n' +
+'                } else if (processData && processData.plexEnabled) {\n' +
+'                    html += \'<div class="plex-info"><div class="plex-icon">🎬</div><div class="plex-details">Plex connected - No active sessions</div></div>\';\n' +
+'                }\n' +
+'                \n' +
+'                return html;\n' +
 '            }\n' +
 '            \n' +
 '            var html = \'<div class="process-list">\';\n' +
-'            for (var i = 0; i < processes.length; i++) {\n' +
-'                var process = processes[i];\n' +
+'            for (var i = 0; i < processData.processes.length; i++) {\n' +
+'                var process = processData.processes[i];\n' +
 '                var appInfo = mapProcessToUmbrelApp(process);\n' +
 '                \n' +
 '                var iconHtml;\n' +
@@ -899,16 +1023,31 @@ function getHtmlPage() {
 '                    iconHtml = \'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8"/><path d="M12 17v4"/></svg>\';\n' +
 '                }\n' +
 '                \n' +
+'                var plexDetails = \'\';\n' +
+'                if (process.plexInfo && process.plexInfo.isTranscoding) {\n' +
+'                    var session = process.plexInfo.session;\n' +
+'                    plexDetails = \'<div class="plex-transcoding">🎬 Transcoding: \' + session.title + \' (\' + session.width + \'x\' + session.height + \')</div>\';\n' +
+'                }\n' +
+'                \n' +
 '                html += \'<div class="process-item">\' +\n' +
 '                    \'<div class="process-icon">\' + iconHtml + \'</div>\' +\n' +
 '                    \'<div class="process-info">\' +\n' +
 '                        \'<div class="process-name">\' + appInfo.name + \'</div>\' +\n' +
 '                        \'<div class="process-details">\' + process.command + \'</div>\' +\n' +
+'                        plexDetails +\n' +
 '                    \'</div>\' +\n' +
 '                    \'<div class="process-pid">PID: \' + process.pid + \'</div>\' +\n' +
 '                \'</div>\';\n' +
 '            }\n' +
 '            html += \'</div>\';\n' +
+'            \n' +
+'            // Show Plex status if enabled\n' +
+'            if (processData.plexEnabled && processData.plexSessions && processData.plexSessions.length > 0) {\n' +
+'                html += \'<div class="plex-info"><div class="plex-icon">🎬</div><div class="plex-details">Plex connected - \' + processData.plexSessions.length + \' active session(s)</div></div>\';\n' +
+'            } else if (processData.plexEnabled) {\n' +
+'                html += \'<div class="plex-info"><div class="plex-icon">🎬</div><div class="plex-details">Plex connected - No active sessions</div></div>\';\n' +
+'            }\n' +
+'            \n' +
 '            return html;\n' +
 '        }\n' +
 '        \n' +

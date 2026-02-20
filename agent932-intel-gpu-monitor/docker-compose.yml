@@ -7,23 +7,38 @@ services:
       APP_PORT: 8847
 
   web:
-    image: ghcr.io/agent932/intel-gpu-monitor:latest
+    build:
+      context: .
+      dockerfile: Dockerfile
     restart: on-failure
     stop_grace_period: 1m
-    # ports section removed; only app_proxy binds host port
+    ports:
+      - "8847:8847"
     environment:
       - NODE_ENV=production
       - PORT=8847
+      - PLEX_URL=${PLEX_URL:-}
+      - PLEX_TOKEN=${PLEX_TOKEN:-}
     privileged: true
     devices:
       - /dev/dri:/dev/dri
     volumes:
-      - ${APP_DATA_DIR}/data:/data
+      - ./data:/data
       - /sys/kernel/debug:/sys/kernel/debug:ro
 
   widget-server:
-    image: ghcr.io/agent932/intel-gpu-monitor-widget:latest
+    build:
+      context: .
+      dockerfile: Dockerfile.widget
     restart: on-failure
+    ports:
+      - "8880:80"
     environment:
       - NODE_ENV=production
       - PORT=80
+      - MAIN_SERVER_URL=http://web:8847
+    privileged: true
+    devices:
+      - /dev/dri:/dev/dri
+    volumes:
+      - /sys/kernel/debug:/sys/kernel/debug:ro

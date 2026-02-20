@@ -34,10 +34,27 @@ app.get('/widgets/gpu', async function(req, res) {
         if (!gpuData.available || !gpuData.data) {
             console.log('[WIDGET] GPU not available, returning placeholder');
             return res.json({
-                type: 'text',
+                type: 'four-stats',
                 refresh: '5s',
                 link: '',
-                text: 'GPU: --'
+                stats: [
+                    {
+                        title: 'GPU Usage',
+                        value: '--'
+                    },
+                    {
+                        title: 'Video Engine',
+                        value: '--'
+                    },
+                    {
+                        title: 'Render Engine',
+                        value: '--'
+                    },
+                    {
+                        title: 'Power',
+                        value: '--'
+                    }
+                ]
             });
         }
 
@@ -57,11 +74,33 @@ app.get('/widgets/gpu', async function(req, res) {
         }
         gpuBusy = engineCount > 0 ? (gpuBusy / engineCount) : 0;
 
+        // Get specific engine values
+        const videoEngine = engines['Video/0'] || engines['Video'] || { busy: 0 };
+        const renderEngine = engines['Render/3D/0'] || engines['Render/3D'] || { busy: 0 };
+        const power = data.power || { value: 0 };
+
         const widgetData = {
-            type: 'text',
+            type: 'four-stats',
             refresh: '5s',
             link: '',
-            text: 'GPU: ' + gpuBusy.toFixed(1) + '%'
+            stats: [
+                {
+                    title: 'GPU Usage',
+                    value: gpuBusy.toFixed(1) + '%'
+                },
+                {
+                    title: 'Video Engine',
+                    value: videoEngine.busy.toFixed(1) + '%'
+                },
+                {
+                    title: 'Render Engine',
+                    value: renderEngine.busy.toFixed(1) + '%'
+                },
+                {
+                    title: 'Power',
+                    value: power.value.toFixed(1) + 'W'
+                }
+            ]
         };
 
         console.log('[WIDGET] Returning:', JSON.stringify(widgetData));
@@ -70,10 +109,27 @@ app.get('/widgets/gpu', async function(req, res) {
     } catch (error) {
         console.error('[WIDGET] Error fetching from main server:', error.message);
         res.json({
-            type: 'text',
+            type: 'four-stats',
             refresh: '5s',
             link: '',
-            text: 'GPU: ERR'
+            stats: [
+                {
+                    title: 'GPU Usage',
+                    value: '--'
+                },
+                {
+                    title: 'Video Engine',
+                    value: '--'
+                },
+                {
+                    title: 'Render Engine',
+                    value: '--'
+                },
+                {
+                    title: 'Power',
+                    value: '--'
+                }
+            ]
         });
     }
 });

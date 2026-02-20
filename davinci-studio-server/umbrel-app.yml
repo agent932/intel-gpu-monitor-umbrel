@@ -28,8 +28,8 @@ description: >-
 developer: WireBear (adapted for Umbrel)
 website: https://wirebear.co.uk/software/studio-server
 dependencies: []
-repo: https://github.com/your-repo  # Replace with actual repo
-support: https://github.com/your-repo/issues  # Replace with actual repo
+repo: https://github.com/agent932/intel-gpu-monitor-umbrel
+support: https://github.com/agent932/intel-gpu-monitor-umbrel/issues
 port: 8543
 gallery:
   - https://raw.githubusercontent.com/wirebear/studio-server/main/screenshot1.png  # Placeholder

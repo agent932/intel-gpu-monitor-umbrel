@@ -1,4 +1,4 @@
-manifestVersion: 1.1
+manifestVersion: 1
 id: agent932-intel-gpu-monitor
 category: utilities
 name: Intel GPU Monitor
@@ -20,6 +20,7 @@ description: >-
   - Per-engine breakdown (Video decode/encode, Render/3D, Blitter)
   - Process detection - see which apps are using GPU
   - Automatic app recognition (Plex, Jellyfin, Emby, etc.)
+  - Plex integration: See what media is being transcoded
   - Beautiful web dashboard with live updates
   - Umbrel homepage widget support
 
@@ -33,13 +34,37 @@ dependencies: []
 repo: https://github.com/agent932/intel-gpu-monitor-umbrel
 support: https://github.com/agent932/intel-gpu-monitor-umbrel/issues
 port: 8847
+gallery:
+  - https://raw.githubusercontent.com/agent932/intel-gpu-monitor-umbrel/main/agent932-intel-gpu-monitor/assets/screenshot1.png
+  - https://raw.githubusercontent.com/agent932/intel-gpu-monitor-umbrel/main/agent932-intel-gpu-monitor/assets/screenshot2.png
+form:
+  - type: text
+    name: plex_url
+    label: "Plex Server URL (optional)"
+    placeholder: "http://plex:32400"
+    hint: "URL of your Plex server for transcoding details. Leave blank to disable Plex integration."
+    required: false
+  - type: password
+    name: plex_token
+    label: "Plex Access Token (optional)"
+    placeholder: "Your Plex token"
+    hint: "Plex access token for API access. Get from https://plex.tv/devices"
+    required: false
 widgets:
   - id: "stats"
-    type: "text"
+    type: "four-stats"
     refresh: "5s"
-    endpoint: "widget-server/widgets/gpu"
+    endpoint: "widget-server:80/widgets/gpu"
     link: ""
     example:
-      type: "text"
+      type: "four-stats"
       link: ""
-      text: "GPU: 42.5%"
+      stats:
+        - title: "GPU Usage"
+          value: "42.5%"
+        - title: "Video Engine"
+          value: "15.2%"
+        - title: "Render Engine"
+          value: "8.1%"
+        - title: "Power"
+          value: "12.3W"
