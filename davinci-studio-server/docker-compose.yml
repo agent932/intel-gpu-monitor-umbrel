@@ -7,7 +7,7 @@ services:
       APP_PORT: 8543
 
   studio:
-    image: allebb/studio-server:latest
+    image: allebb/studio-server:latest@sha256:b96c9cc9f665a7075b962f88b83309a95598218d48a78f8eb88a7065900db0ec
     restart: unless-stopped
     ports:
       - "8543:8543"
