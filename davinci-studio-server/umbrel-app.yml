@@ -4,7 +4,7 @@ category: media
 name: DaVinci Resolve Studio Server
 version: "1.0.0"
 tagline: Central project server for DaVinci Resolve collaboration
-icon: https://raw.githubusercontent.com/wirebear/studio-server/main/icon.svg  # Placeholder, replace with actual icon
+icon: https://www.blackmagicdesign.com/themes/bmd/img/davinci-resolve-logo.png
 description: >-
   DaVinci Resolve Studio Server is a self-contained Docker container that serves as a Project Server for Blackmagic Design's DaVinci Resolve, enabling easy setup and management of central dedicated project servers for video editing and color grading collaboration.
 
@@ -31,8 +31,6 @@ dependencies: []
 repo: https://github.com/agent932/intel-gpu-monitor-umbrel
 support: https://github.com/agent932/intel-gpu-monitor-umbrel/issues
 port: 8543
-gallery:
-  - https://raw.githubusercontent.com/wirebear/studio-server/main/screenshot1.png  # Placeholder
 form:
   - type: text
     name: tz
@@ -40,4 +38,3 @@ form:
     placeholder: "Europe/London"
     hint: "Timezone for the server (e.g., Europe/London, America/New_York)"
     required: false
-    default: "Europe/London"

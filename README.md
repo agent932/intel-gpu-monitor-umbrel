@@ -13,8 +13,8 @@ This repository contains my custom Umbrel App Store. Unlike the official store, 
 
 | Nr. | Logo | App-Name | Description | Port |
 | :---: | :---: | :-- | :-- | :---: |
-| 1 | <img height="30" src="https://raw.githubusercontent.com/agent932/intel-gpu-monitor-umbrel/main/agent932-intel-gpu-monitor/assets/agent932-intel-gpu-monitor.svg" /> | [Intel GPU Monitor](https://github.com/agent932/intel-gpu-monitor-umbrel) | Real-time Intel GPU monitoring for your home server | 8847 |
-| 2 | <img height="30" src="https://raw.githubusercontent.com/agent932/davinci-studio-server/main/davinci-studio-server/icon.svg" /> | [DaVinci Resolve Studio Server](https://github.com/agent932/davinci-studio-server) | Central project server for DaVinci Resolve collaboration | 8543 |
+| 1 | <img height="30" src="https://raw.githubusercontent.com/agent932/intel-gpu-monitor-umbrel/main/agent932-intel-gpu-monitor/assets/agent932-intel-gpu-monitor.svg" /> | [Intel GPU Monitor](https://github.com/agent932/intel-gpu-monitor-umbrel/tree/main/agent932-intel-gpu-monitor) | Real-time Intel GPU monitoring for your home server | 8847 |
+| 2 | <img height="30" src="https://www.blackmagicdesign.com/themes/bmd/img/davinci-resolve-logo.png" /> | [DaVinci Resolve Studio Server](https://github.com/agent932/intel-gpu-monitor-umbrel/tree/main/davinci-studio-server) | Central project server for DaVinci Resolve collaboration | 8543 |
 
 ## Installation
 
