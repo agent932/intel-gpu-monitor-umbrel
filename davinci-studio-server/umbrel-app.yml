@@ -1,0 +1,43 @@
+manifestVersion: 1
+id: davinci-studio-server
+category: media
+name: DaVinci Resolve Studio Server
+version: "1.0.0"
+tagline: Central project server for DaVinci Resolve collaboration
+icon: https://raw.githubusercontent.com/wirebear/studio-server/main/icon.svg  # Placeholder, replace with actual icon
+description: >-
+  DaVinci Resolve Studio Server is a self-contained Docker container that serves as a Project Server for Blackmagic Design's DaVinci Resolve, enabling easy setup and management of central dedicated project servers for video editing and color grading collaboration.
+
+  Features:
+  - Intuitive web-based management panel
+  - Easy setup and configuration of project databases
+  - Automatic database users and roles creation
+  - One-click scheduled backups per database
+  - Automatic purge of old database backups
+  - Custom automated backup schedules
+  - Instant manual backup and restore
+  - Database password reset
+  - Customizable pre- and post-backup hook scripts
+  - Cloud-friendly database backups
+
+  This app is based on Studio Server by WireBear, adapted for the Umbrel app store.
+
+  Requirements:
+  - Compatible with x86-based servers
+  - Works on NAS devices supporting Docker
+developer: WireBear (adapted for Umbrel)
+website: https://wirebear.co.uk/software/studio-server
+dependencies: []
+repo: https://github.com/your-repo  # Replace with actual repo
+support: https://github.com/your-repo/issues  # Replace with actual repo
+port: 8543
+gallery:
+  - https://raw.githubusercontent.com/wirebear/studio-server/main/screenshot1.png  # Placeholder
+form:
+  - type: text
+    name: tz
+    label: "Timezone"
+    placeholder: "Europe/London"
+    hint: "Timezone for the server (e.g., Europe/London, America/New_York)"
+    required: false
+    default: "Europe/London"

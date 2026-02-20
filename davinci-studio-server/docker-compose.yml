@@ -1,0 +1,22 @@
+version: "3.7"
+
+services:
+  app_proxy:
+    environment:
+      APP_HOST: davinci-studio-server_studio_1
+      APP_PORT: 8543
+
+  studio:
+    image: allebb/studio-server:latest
+    restart: unless-stopped
+    ports:
+      - "8543:8543"
+      - "5432:5432"
+      - "50059:50059"
+    environment:
+      - TZ=${TZ:-Europe/London}
+    volumes:
+      - ./data/hooks:/var/studio-server/hooks
+      - ./data/database:/var/studio-server/database
+      - ./data/backups:/var/studio-server/backups
+      - ./data/jobs:/etc/cron.d
