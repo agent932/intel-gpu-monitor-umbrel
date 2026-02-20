@@ -3,7 +3,7 @@ version: "3.7"
 services:
   app_proxy:
     environment:
-      APP_HOST: davinci-studio-server_studio_1
+      APP_HOST: agent932-davinci-studio-server_studio_1
       APP_PORT: 8543
 
   studio:
