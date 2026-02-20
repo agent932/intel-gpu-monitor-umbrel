@@ -4,7 +4,7 @@ category: utilities
 name: Intel GPU Monitor
 version: "1.0.0"
 tagline: Real-time Intel GPU monitoring for your home server
-icon: https://raw.githubusercontent.com/agent932/intel-gpu-monitor-umbrel/main/agent932-intel-gpu-monitor/assets/agent932-intel-gpu-monitor.svg
+icon: https://raw.githubusercontent.com/agent932/umbrel-apps/main/apps/agent932-intel-gpu-monitor/assets/agent932-intel-gpu-monitor.svg
 description: >-
   Intel GPU Monitor provides real-time monitoring of Intel integrated GPUs for Umbrel.
   Perfect for seeing which apps are using hardware acceleration and monitoring GPU
@@ -29,14 +29,14 @@ description: >-
   - Intel CPU with integrated graphics (6th gen or newer recommended)
   - Works great with Intel NUC, N100/N95 mini PCs, and other Intel-based hardware
 developer: agent932
-website: https://github.com/agent932/intel-gpu-monitor-umbrel
+website: https://github.com/agent932/umbrel-apps
 dependencies: []
-repo: https://github.com/agent932/intel-gpu-monitor-umbrel
-support: https://github.com/agent932/intel-gpu-monitor-umbrel/issues
+repo: https://github.com/agent932/umbrel-apps
+support: https://github.com/agent932/umbrel-apps/issues
 port: 8847
 gallery:
-  - https://raw.githubusercontent.com/agent932/intel-gpu-monitor-umbrel/main/agent932-intel-gpu-monitor/assets/screenshot1.png
-  - https://raw.githubusercontent.com/agent932/intel-gpu-monitor-umbrel/main/agent932-intel-gpu-monitor/assets/screenshot2.png
+  - https://raw.githubusercontent.com/agent932/umbrel-apps/main/apps/agent932-intel-gpu-monitor/assets/screenshot1.png
+  - https://raw.githubusercontent.com/agent932/umbrel-apps/main/apps/agent932-intel-gpu-monitor/assets/screenshot2.png
 form:
   - type: text
     name: plex_url
