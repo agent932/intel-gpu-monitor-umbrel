@@ -1,10 +1,12 @@
 name: Build Intel GPU Monitor
 
 on:
+  workflow_dispatch:
   push:
     branches: [main]
     paths:
       - "agent932-intel-gpu-monitor/**"
+      - ".github/workflows/build-intel-gpu-monitor.yml"
 
 env:
   REGISTRY: ghcr.io
