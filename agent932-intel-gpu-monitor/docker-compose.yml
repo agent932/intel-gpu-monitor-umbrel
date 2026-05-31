@@ -13,8 +13,8 @@ services:
     environment:
       - NODE_ENV=production
       - PORT=8847
-      - PLEX_URL=${PLEX_URL:-}
-      - PLEX_TOKEN=${PLEX_TOKEN:-}
+      - PLEX_URL=${plex_url:-}
+      - PLEX_TOKEN=${plex_token:-}
     privileged: true
     devices:
       - /dev/dri:/dev/dri
