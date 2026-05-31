@@ -7,9 +7,7 @@ services:
       APP_PORT: 8847
 
   web:
-    build:
-      context: .
-      dockerfile: Dockerfile
+    image: ghcr.io/agent932/intel-gpu-monitor-web:latest
     restart: on-failure
     stop_grace_period: 1m
     ports:
@@ -27,9 +25,7 @@ services:
       - /sys/kernel/debug:/sys/kernel/debug:ro
 
   widget-server:
-    build:
-      context: .
-      dockerfile: Dockerfile.widget
+    image: ghcr.io/agent932/intel-gpu-monitor-widget:latest
     restart: on-failure
     ports:
       - "8880:80"
