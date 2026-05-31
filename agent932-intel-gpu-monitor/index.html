@@ -1,0 +1,674 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Intel GPU Monitor</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg:        #0c0c0e;
+      --card:      #141416;
+      --card-alt:  #1a1a1d;
+      --border:    rgba(255,255,255,0.06);
+      --border-hi: rgba(255,255,255,0.12);
+      --t1: #ffffff;
+      --t2: rgba(255,255,255,0.5);
+      --t3: rgba(255,255,255,0.28);
+      --accent:    #5351FB;
+      --accent-hi: #7B79FF;
+      --green:  #4ADE80;
+      --yellow: #FFB800;
+      --red:    #FF3B30;
+      --blue:   #60A5FA;
+      --orange: #FB923C;
+      --cyan:   #22D3EE;
+      --pink:   #F472B6;
+      --track:  rgba(255,255,255,0.07);
+    }
+
+    * { margin:0; padding:0; box-sizing:border-box; }
+
+    body {
+      font-family: "Inter", -apple-system, BlinkMacSystemFont, sans-serif;
+      background: var(--bg);
+      color: var(--t1);
+      padding: 24px;
+      min-height: 100vh;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    .container { max-width: 1100px; margin: 0 auto; }
+
+    /* ── Header ───────────────────────────────────────────── */
+    header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 28px;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    .header-left { display: flex; align-items: center; gap: 14px; }
+
+    .app-icon {
+      width: 44px; height: 44px;
+      border-radius: 11px;
+      background: linear-gradient(135deg, var(--accent), var(--accent-hi));
+      display: flex; align-items: center; justify-content: center;
+      overflow: hidden;
+      flex-shrink: 0;
+    }
+    .app-icon img { width: 100%; height: 100%; object-fit: cover; }
+
+    h1 { font-size: 22px; font-weight: 600; letter-spacing: -0.02em; }
+    .subtitle { font-size: 13px; color: var(--t3); margin-top: 2px; }
+
+    .header-right { display: flex; align-items: center; gap: 12px; }
+
+    .status-pill {
+      display: inline-flex; align-items: center; gap: 7px;
+      padding: 5px 12px;
+      background: rgba(255,255,255,0.05);
+      border: 1px solid var(--border);
+      border-radius: 100px;
+      font-size: 12px; font-weight: 500; color: var(--t2);
+    }
+    .status-dot {
+      width: 7px; height: 7px; border-radius: 50%;
+      background: var(--yellow);
+      box-shadow: 0 0 6px var(--yellow);
+      flex-shrink: 0;
+    }
+    .status-dot.live        { background: var(--green);  box-shadow: 0 0 6px var(--green); }
+    .status-dot.disconnected{ background: var(--red);    box-shadow: 0 0 6px var(--red); }
+
+    .updated-text { font-size: 12px; color: var(--t3); }
+
+    /* ── Cards ────────────────────────────────────────────── */
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 20px;
+      transition: border-color 0.2s;
+    }
+    .card:hover { border-color: var(--border-hi); }
+
+    .card-label {
+      font-size: 11px; font-weight: 600; letter-spacing: 0.06em;
+      text-transform: uppercase; color: var(--t3);
+      margin-bottom: 10px;
+    }
+
+    /* ── Hero card ────────────────────────────────────────── */
+    .hero-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 24px 24px 16px;
+      margin-bottom: 16px;
+    }
+    .hero-card:hover { border-color: var(--border-hi); }
+
+    .hero-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 16px;
+    }
+    .hero-big {
+      font-size: 56px; font-weight: 700;
+      letter-spacing: -0.04em;
+      font-variant-numeric: tabular-nums;
+      line-height: 1;
+      transition: color 0.4s;
+    }
+    .hero-unit { font-size: 24px; font-weight: 400; color: var(--t3); margin-left: 4px; }
+    .hero-sub {
+      font-size: 13px; color: var(--t3); margin-top: 6px;
+    }
+    .hero-right { text-align: right; }
+    .hero-rc6-label { font-size: 11px; color: var(--t3); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 4px; }
+    .hero-rc6-val { font-size: 22px; font-weight: 600; color: var(--cyan); font-variant-numeric: tabular-nums; }
+
+    .hero-bar-wrap {
+      height: 8px; background: var(--track); border-radius: 4px;
+      overflow: hidden; margin-bottom: 12px;
+    }
+    .hero-bar-fill {
+      height: 100%; border-radius: 4px;
+      transition: width 0.4s ease, background 0.4s;
+    }
+
+    .sparkline-wrap { height: 48px; }
+    .sparkline-wrap svg { display: block; width: 100%; height: 100%; }
+
+    /* ── Stat row ─────────────────────────────────────────── */
+    .stat-row {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+
+    .stat-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 16px 16px 10px;
+      transition: border-color 0.2s;
+    }
+    .stat-card:hover { border-color: var(--border-hi); }
+
+    .stat-label { font-size: 11px; color: var(--t3); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 8px; }
+    .stat-value {
+      font-size: 26px; font-weight: 700;
+      letter-spacing: -0.03em;
+      font-variant-numeric: tabular-nums;
+      line-height: 1;
+    }
+    .stat-unit { font-size: 13px; font-weight: 400; color: var(--t3); margin-left: 2px; }
+    .stat-sub { font-size: 12px; color: var(--t3); margin-top: 4px; margin-bottom: 8px; }
+    .stat-spark { height: 32px; }
+    .stat-spark svg { display: block; width: 100%; height: 100%; }
+
+    /* ── Two-column layout ────────────────────────────────── */
+    .two-col {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      margin-bottom: 16px;
+    }
+
+    /* ── Engine breakdown ─────────────────────────────────── */
+    .engine-list { display: flex; flex-direction: column; gap: 10px; }
+
+    .engine-row { display: flex; align-items: center; gap: 10px; }
+    .engine-name-col {
+      width: 120px; flex-shrink: 0;
+      font-size: 12px; color: var(--t2); font-weight: 500;
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+    .engine-bar-col { flex: 1; }
+    .engine-track { height: 6px; background: var(--track); border-radius: 3px; overflow: hidden; }
+    .engine-fill  { height: 100%; border-radius: 3px; transition: width 0.4s ease, background 0.4s; min-width: 2px; }
+    .engine-pct {
+      width: 46px; flex-shrink: 0; text-align: right;
+      font-size: 13px; font-weight: 600; font-variant-numeric: tabular-nums; color: var(--t1);
+    }
+
+    /* ── Processes ────────────────────────────────────────── */
+    .section-header {
+      display: flex; align-items: center; gap: 10px;
+      margin-bottom: 14px;
+    }
+    .section-title { font-size: 15px; font-weight: 600; }
+    .badge {
+      background: rgba(83,81,251,0.2); color: var(--accent-hi);
+      padding: 3px 10px; border-radius: 20px;
+      font-size: 11px; font-weight: 600;
+    }
+
+    .process-list { display: flex; flex-direction: column; gap: 8px; }
+
+    .process-item {
+      display: flex; align-items: center; gap: 14px;
+      padding: 12px 14px;
+      background: rgba(255,255,255,0.02);
+      border: 1px solid var(--border);
+      border-radius: 11px;
+      transition: background 0.15s, border-color 0.15s;
+    }
+    .process-item:hover { background: rgba(255,255,255,0.04); border-color: var(--border-hi); }
+
+    .p-icon {
+      width: 40px; height: 40px; flex-shrink: 0;
+      border-radius: 10px; background: rgba(255,255,255,0.06);
+      display: flex; align-items: center; justify-content: center;
+      overflow: hidden;
+    }
+    .p-icon img { width: 100%; height: 100%; object-fit: cover; }
+    .p-icon svg { width: 20px; height: 20px; color: var(--t3); }
+
+    .p-info { flex: 1; min-width: 0; }
+    .p-name { font-size: 14px; font-weight: 600; }
+    .p-cmd  { font-size: 12px; color: var(--t3); font-family: "SF Mono", Monaco, monospace; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-top: 2px; }
+    .p-transcode {
+      display: inline-block; margin-top: 4px;
+      font-size: 11px; font-weight: 600; color: var(--accent-hi);
+      background: rgba(83,81,251,0.15); border-radius: 5px; padding: 2px 7px;
+    }
+
+    .p-pid {
+      flex-shrink: 0;
+      font-size: 11px; font-weight: 600; color: var(--t3);
+      font-family: "SF Mono", Monaco, monospace;
+      background: rgba(255,255,255,0.05);
+      padding: 4px 9px; border-radius: 7px;
+    }
+
+    .no-processes { padding: 24px 0; text-align: center; color: var(--t3); font-size: 13px; }
+
+    .plex-banner {
+      display: flex; align-items: center; gap: 10px;
+      padding: 12px 14px;
+      background: rgba(83,81,251,0.08);
+      border: 1px solid rgba(83,81,251,0.2);
+      border-radius: 11px;
+      margin-top: 8px;
+      font-size: 13px; color: var(--t2);
+    }
+
+    /* ── Raw data ─────────────────────────────────────────── */
+    .raw-section { margin-top: 16px; }
+    .raw-toggle {
+      display: flex; align-items: center; justify-content: space-between;
+      cursor: pointer; padding: 14px 20px;
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: 12px; user-select: none;
+      transition: border-color 0.15s;
+    }
+    .raw-toggle:hover { border-color: var(--border-hi); }
+    .raw-toggle-label { font-size: 13px; font-weight: 500; color: var(--t2); }
+    .raw-toggle-chevron { font-size: 12px; color: var(--t3); transition: transform 0.2s; }
+    .raw-toggle-chevron.open { transform: rotate(180deg); }
+    .raw-body { display: none; margin-top: 4px; }
+    .raw-body.open { display: block; }
+    pre.raw-pre {
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: 12px; padding: 16px;
+      font-family: "SF Mono", Monaco, monospace; font-size: 12px;
+      color: var(--t2); line-height: 1.6;
+      max-height: 320px; overflow: auto;
+    }
+
+    /* ── Unavailable state ────────────────────────────────── */
+    .unavail-card {
+      padding: 48px; text-align: center;
+      background: rgba(255,59,48,0.06);
+      border: 1px solid rgba(255,59,48,0.15);
+      border-radius: 16px;
+    }
+    .unavail-card h3 { font-size: 17px; font-weight: 600; color: #FF6B6B; margin-bottom: 8px; }
+    .unavail-card p  { font-size: 14px; color: var(--t3); }
+
+    /* ── Responsive ───────────────────────────────────────── */
+    @media (max-width: 900px) {
+      .two-col { grid-template-columns: 1fr; }
+    }
+    @media (max-width: 700px) {
+      body { padding: 16px; }
+      .stat-row { grid-template-columns: repeat(2, 1fr); }
+      h1 { font-size: 18px; }
+      .hero-big { font-size: 42px; }
+    }
+    @media (max-width: 420px) {
+      .stat-row { grid-template-columns: 1fr 1fr; }
+      .engine-name-col { width: 80px; }
+    }
+  </style>
+</head>
+<body>
+<div class="container">
+
+  <header>
+    <div class="header-left">
+      <div class="app-icon">
+        <img src="/assets/agent932-intel-gpu-monitor.png" alt="icon"
+             onerror="this.style.display='none'">
+      </div>
+      <div>
+        <h1>Intel GPU Monitor</h1>
+        <div class="subtitle">Real-time Intel GPU metrics</div>
+      </div>
+    </div>
+    <div class="header-right">
+      <div class="status-pill">
+        <div id="status-dot" class="status-dot"></div>
+        <span id="status-text">Connecting…</span>
+      </div>
+      <div class="updated-text" id="updated-text"></div>
+    </div>
+  </header>
+
+  <div id="main-content">
+    <div class="card" style="padding:48px;text-align:center;color:var(--t3)">
+      Waiting for GPU data…
+    </div>
+  </div>
+
+  <div class="raw-section">
+    <div class="raw-toggle" onclick="toggleRaw(this)">
+      <span class="raw-toggle-label">Raw JSON</span>
+      <span class="raw-toggle-chevron" id="raw-chevron">▼</span>
+    </div>
+    <div class="raw-body" id="raw-body">
+      <pre class="raw-pre" id="raw-pre">No data yet.</pre>
+    </div>
+  </div>
+
+</div>
+
+<script>
+// ── History buffers ───────────────────────────────────────────
+var HIST = 60;
+var hist = { busy: [], freq: [], gpuPower: [], pkgPower: [], rc6: [] };
+
+function pushHist(key, val) {
+  hist[key].push(val);
+  if (hist[key].length > HIST) hist[key].shift();
+}
+
+// ── Sparkline SVG ─────────────────────────────────────────────
+function sparkline(data, color, fill) {
+  if (data.length < 2) return '';
+  var w = 300, h = 40;
+  var max = Math.max.apply(null, data);
+  var min = 0;
+  if (max === min) max = min + 1;
+
+  var pts = data.map(function(v, i) {
+    var x = (i / (data.length - 1)) * w;
+    var y = h - ((v - min) / (max - min)) * (h - 2) - 1;
+    return x.toFixed(1) + ',' + y.toFixed(1);
+  });
+
+  var polyPts = pts.join(' ');
+  var areaId = 'a' + color.replace('#','');
+
+  var areaPath = '0,' + h + ' ' + polyPts + ' ' + w + ',' + h;
+
+  return '<svg viewBox="0 0 ' + w + ' ' + h + '" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">' +
+    '<defs><linearGradient id="' + areaId + '" x1="0" y1="0" x2="0" y2="1">' +
+      '<stop offset="0%" stop-color="' + color + '" stop-opacity="' + (fill || 0.18) + '"/>' +
+      '<stop offset="100%" stop-color="' + color + '" stop-opacity="0"/>' +
+    '</linearGradient></defs>' +
+    '<polygon points="' + areaPath + '" fill="url(#' + areaId + ')"/>' +
+    '<polyline points="' + polyPts + '" fill="none" stroke="' + color + '" stroke-width="1.5" stroke-linejoin="round" stroke-linecap="round"/>' +
+  '</svg>';
+}
+
+// ── Color by utilization % ────────────────────────────────────
+function utilColor(pct) {
+  if (pct < 30) return 'var(--green)';
+  if (pct < 70) return 'var(--yellow)';
+  return 'var(--red)';
+}
+function utilHex(pct) {
+  if (pct < 30) return '#4ADE80';
+  if (pct < 70) return '#FFB800';
+  return '#FF3B30';
+}
+
+// ── App mapping ───────────────────────────────────────────────
+var APP_MAP = [
+  { kw: ['plex','plexmediaserver'], name: 'Plex',        icon: 'https://getumbrel.github.io/umbrel-apps-gallery/plex/icon.svg' },
+  { kw: ['jellyfin'],               name: 'Jellyfin',    icon: 'https://getumbrel.github.io/umbrel-apps-gallery/jellyfin/icon.svg' },
+  { kw: ['emby'],                   name: 'Emby',        icon: 'https://getumbrel.github.io/umbrel-apps-gallery/emby/icon.svg' },
+  { kw: ['immich'],                 name: 'Immich',      icon: 'https://getumbrel.github.io/umbrel-apps-gallery/immich/icon.svg' },
+  { kw: ['photoprism'],             name: 'PhotoPrism',  icon: 'https://getumbrel.github.io/umbrel-apps-gallery/photoprism/icon.svg' },
+  { kw: ['frigate'],                name: 'Frigate',     icon: 'https://getumbrel.github.io/umbrel-apps-gallery/frigate/icon.svg' },
+  { kw: ['handbrake'],              name: 'HandBrake',   icon: 'https://getumbrel.github.io/umbrel-apps-gallery/handbrake/icon.svg' },
+  { kw: ['tdarr'],                  name: 'Tdarr',       icon: 'https://getumbrel.github.io/umbrel-apps-gallery/tdarr/icon.svg' },
+  { kw: ['ffmpeg'],                 name: 'FFmpeg',      icon: null },
+  { kw: ['chrome','chromium'],      name: 'Chrome',      icon: null },
+  { kw: ['firefox'],                name: 'Firefox',     icon: null },
+];
+
+function mapProcess(proc) {
+  var n = (proc.name || '').toLowerCase();
+  var c = (proc.command || '').toLowerCase();
+  for (var i = 0; i < APP_MAP.length; i++) {
+    var m = APP_MAP[i];
+    for (var j = 0; j < m.kw.length; j++) {
+      if (n.includes(m.kw[j]) || c.includes(m.kw[j])) return m;
+    }
+  }
+  return { name: proc.name || proc.command || 'Unknown', icon: null };
+}
+
+// ── DOM refs ──────────────────────────────────────────────────
+var mainContent = document.getElementById('main-content');
+var rawPre      = document.getElementById('raw-pre');
+var statusDot   = document.getElementById('status-dot');
+var statusText  = document.getElementById('status-text');
+var updatedText = document.getElementById('updated-text');
+
+// ── Last-update ticker ────────────────────────────────────────
+var lastUpdate = null;
+setInterval(function() {
+  if (!lastUpdate) return;
+  var sec = Math.round((Date.now() - lastUpdate) / 1000);
+  updatedText.textContent = sec < 2 ? 'Just updated' : 'Updated ' + sec + 's ago';
+  updatedText.style.color = sec > 5 ? 'var(--yellow)' : 'var(--t3)';
+}, 1000);
+
+// ── Render ────────────────────────────────────────────────────
+function render(msg) {
+  if (!msg.available || !msg.data) {
+    mainContent.innerHTML =
+      '<div class="unavail-card"><h3>GPU Not Available</h3>' +
+      '<p>Intel GPU not detected or intel_gpu_top cannot access /dev/dri.</p></div>';
+    return;
+  }
+
+  var d = msg.data;
+  var engines   = d.engines   || {};
+  var frequency = d.frequency || {};
+  var power     = d.power     || {};
+  var rc6       = d.rc6       || {};
+  var procData  = msg.processes || {};
+
+  // Compute overall busy
+  var keys = Object.keys(engines);
+  var totalBusy = 0, eCount = 0;
+  for (var i = 0; i < keys.length; i++) {
+    var e = engines[keys[i]];
+    if (typeof e.busy === 'number') { totalBusy += e.busy; eCount++; }
+  }
+  var gpuBusy = eCount ? totalBusy / eCount : 0;
+
+  var actualFreq  = frequency.actual    || 0;
+  var reqFreq     = frequency.requested || 0;
+  var gpuPow      = power.GPU     || 0;
+  var pkgPow      = power.Package || 0;
+  var rc6Val      = rc6.value     || 0;
+
+  // Push history
+  pushHist('busy',     gpuBusy);
+  pushHist('freq',     actualFreq);
+  pushHist('gpuPower', gpuPow);
+  pushHist('pkgPower', pkgPow);
+  pushHist('rc6',      rc6Val);
+
+  var busyColor = utilColor(gpuBusy);
+  var busyHex   = utilHex(gpuBusy);
+
+  // ── Hero card ──────────────────────────────────────────
+  var heroHtml =
+    '<div class="hero-card">' +
+      '<div class="hero-top">' +
+        '<div>' +
+          '<div class="card-label">Overall GPU Utilization</div>' +
+          '<div class="hero-big" style="color:' + busyColor + '">' +
+            gpuBusy.toFixed(1) + '<span class="hero-unit">%</span>' +
+          '</div>' +
+          '<div class="hero-sub">Avg across ' + eCount + ' engine' + (eCount !== 1 ? 's' : '') + '</div>' +
+        '</div>' +
+        '<div class="hero-right">' +
+          '<div class="hero-rc6-label">RC6 Idle</div>' +
+          '<div class="hero-rc6-val">' + rc6Val.toFixed(1) + '<span style="font-size:14px;color:var(--t3);font-weight:400"> %</span></div>' +
+        '</div>' +
+      '</div>' +
+      '<div class="hero-bar-wrap">' +
+        '<div class="hero-bar-fill" style="width:' + Math.min(gpuBusy,100).toFixed(1) + '%;background:' + busyColor + '"></div>' +
+      '</div>' +
+      '<div class="sparkline-wrap">' + sparkline(hist.busy, busyHex, 0.15) + '</div>' +
+    '</div>';
+
+  // ── Stat row ───────────────────────────────────────────
+  var freqColor  = '#60A5FA';
+  var gpuPColor  = gpuPow  > 15 ? '#FFB800' : '#FB923C';
+  var pkgPColor  = '#F472B6';
+
+  var statHtml =
+    '<div class="stat-row">' +
+      statCard('Frequency', actualFreq.toFixed(0), 'MHz', 'Req ' + reqFreq.toFixed(0) + ' MHz', hist.freq,    freqColor) +
+      statCard('GPU Power',  gpuPow.toFixed(1),     'W',   '',                                   hist.gpuPower, gpuPColor) +
+      statCard('Pkg Power',  pkgPow.toFixed(1),     'W',   '',                                   hist.pkgPower, pkgPColor) +
+      statCard('RC6 Idle',   rc6Val.toFixed(1),     '%',   'Power saving',                       hist.rc6,     '#22D3EE') +
+    '</div>';
+
+  // ── Two-col: engines + processes ──────────────────────
+  var engHtml = engineCard(engines, keys);
+  var procHtml = processCard(procData);
+
+  var twoColHtml = '<div class="two-col">' + engHtml + procHtml + '</div>';
+
+  mainContent.innerHTML = heroHtml + statHtml + twoColHtml;
+  rawPre.textContent = JSON.stringify(d, null, 2);
+  lastUpdate = Date.now();
+}
+
+function statCard(label, val, unit, sub, histArr, color) {
+  return '<div class="stat-card">' +
+    '<div class="stat-label">' + label + '</div>' +
+    '<div class="stat-value">' + val + '<span class="stat-unit">' + unit + '</span></div>' +
+    (sub ? '<div class="stat-sub">' + sub + '</div>' : '<div style="height:8px"></div>') +
+    '<div class="stat-spark">' + sparkline(histArr, color) + '</div>' +
+  '</div>';
+}
+
+function engineCard(engines, keys) {
+  if (!keys.length) return '<div class="card"><div class="card-label">Engines</div><div style="color:var(--t3);font-size:13px">No engine data</div></div>';
+
+  var rows = '';
+  for (var i = 0; i < keys.length; i++) {
+    var name = keys[i];
+    var busy = engines[name].busy || 0;
+    var color = utilHex(busy);
+    rows +=
+      '<div class="engine-row">' +
+        '<div class="engine-name-col" title="' + name + '">' + name + '</div>' +
+        '<div class="engine-bar-col">' +
+          '<div class="engine-track">' +
+            '<div class="engine-fill" style="width:' + Math.min(busy,100).toFixed(1) + '%;background:' + color + '"></div>' +
+          '</div>' +
+        '</div>' +
+        '<div class="engine-pct">' + busy.toFixed(1) + '%</div>' +
+      '</div>';
+  }
+
+  return '<div class="card">' +
+    '<div class="card-label">Engine Breakdown</div>' +
+    '<div class="engine-list">' + rows + '</div>' +
+  '</div>';
+}
+
+function processCard(procData) {
+  var processes   = procData.processes   || [];
+  var plexEnabled = procData.plexEnabled || false;
+  var plexSessions= procData.plexSessions|| [];
+
+  var inner = '';
+
+  if (processes.length === 0) {
+    inner = '<div class="no-processes">No applications currently using the GPU</div>';
+  } else {
+    inner = '<div class="process-list">';
+    for (var i = 0; i < processes.length; i++) {
+      var proc = processes[i];
+      var app  = mapProcess(proc);
+
+      var iconInner = app.icon
+        ? '<img src="' + app.icon + '" alt="' + app.name + '" onerror="this.parentNode.innerHTML=\'<svg viewBox=&quot;0 0 24 24&quot; fill=&quot;none&quot; stroke=&quot;currentColor&quot; stroke-width=&quot;2&quot;><rect x=&quot;2&quot; y=&quot;3&quot; width=&quot;20&quot; height=&quot;14&quot; rx=&quot;2&quot;/><path d=&quot;M8 21h8&quot;/><path d=&quot;M12 17v4&quot;/></svg>\'">'
+        : '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8"/><path d="M12 17v4"/></svg>';
+
+      var transcode = '';
+      if (proc.plexInfo && proc.plexInfo.isTranscoding) {
+        var s = proc.plexInfo.session;
+        transcode = '<div class="p-transcode">Transcoding: ' + s.title + ' (' + s.width + 'x' + s.height + ')</div>';
+      }
+
+      inner +=
+        '<div class="process-item">' +
+          '<div class="p-icon">' + iconInner + '</div>' +
+          '<div class="p-info">' +
+            '<div class="p-name">' + escHtml(app.name) + '</div>' +
+            '<div class="p-cmd">' + escHtml(proc.command || '') + '</div>' +
+            transcode +
+          '</div>' +
+          '<div class="p-pid">PID ' + proc.pid + '</div>' +
+        '</div>';
+    }
+    inner += '</div>';
+  }
+
+  if (plexEnabled) {
+    var sessionCount = plexSessions.length;
+    inner += '<div class="plex-banner">' +
+      '<span style="font-size:16px">🎬</span>' +
+      '<span>Plex connected — ' + (sessionCount ? sessionCount + ' active session' + (sessionCount > 1 ? 's' : '') : 'no active sessions') + '</span>' +
+    '</div>';
+  }
+
+  var count = processes.length;
+  return '<div class="card">' +
+    '<div class="section-header">' +
+      '<span class="section-title">GPU Applications</span>' +
+      '<span class="badge">' + count + ' active</span>' +
+    '</div>' +
+    inner +
+  '</div>';
+}
+
+function escHtml(s) {
+  return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+// ── Raw toggle ────────────────────────────────────────────────
+function toggleRaw(el) {
+  var body    = document.getElementById('raw-body');
+  var chevron = document.getElementById('raw-chevron');
+  var open    = body.classList.toggle('open');
+  chevron.classList.toggle('open', open);
+}
+
+// ── WebSocket ─────────────────────────────────────────────────
+var ws;
+var reconnectTimer;
+
+function connect() {
+  var proto = location.protocol === 'https:' ? 'wss:' : 'ws:';
+  ws = new WebSocket(proto + '//' + location.host + '/ws');
+
+  ws.onopen = function() {
+    statusDot.className  = 'status-dot live';
+    statusText.textContent = 'Live';
+    clearInterval(reconnectTimer);
+  };
+
+  ws.onmessage = function(evt) {
+    try { render(JSON.parse(evt.data)); }
+    catch(e) { console.error('parse error', e); }
+  };
+
+  ws.onclose = function() {
+    statusDot.className    = 'status-dot disconnected';
+    statusText.textContent = 'Reconnecting…';
+    updatedText.textContent = '';
+    clearInterval(reconnectTimer);
+    reconnectTimer = setInterval(connect, 3000);
+  };
+
+  ws.onerror = function(e) { console.error('ws error', e); };
+}
+
+connect();
+</script>
+</body>
+</html>

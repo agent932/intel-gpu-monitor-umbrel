@@ -5,14 +5,8 @@ const app = express();
 const PORT = process.env.PORT || 80;
 const MAIN_SERVER_URL = process.env.MAIN_SERVER_URL || 'http://agent932-intel-gpu-monitor_web_1:8847';
 
-// Log ALL incoming requests
 app.use((req, res, next) => {
-    console.log('='.repeat(60));
-    console.log('[WIDGET-SERVER REQUEST]', new Date().toISOString());
-    console.log('[METHOD]', req.method);
-    console.log('[URL]', req.url);
-    console.log('[PATH]', req.path);
-    console.log('='.repeat(60));
+    console.log('[WIDGET-SERVER]', req.method, req.url);
     next();
 });
 
@@ -77,7 +71,7 @@ app.get('/widgets/gpu', async function(req, res) {
         // Get specific engine values
         const videoEngine = engines['Video/0'] || engines['Video'] || { busy: 0 };
         const renderEngine = engines['Render/3D/0'] || engines['Render/3D'] || { busy: 0 };
-        const power = data.power || { value: 0 };
+        const power = data.power || { GPU: 0 };
 
         const widgetData = {
             type: 'four-stats',
@@ -98,7 +92,7 @@ app.get('/widgets/gpu', async function(req, res) {
                 },
                 {
                     title: 'Power',
-                    value: power.value.toFixed(1) + 'W'
+                    value: (power.GPU || 0).toFixed(1) + 'W'
                 }
             ]
         };

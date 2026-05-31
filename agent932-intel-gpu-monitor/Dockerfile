@@ -21,6 +21,8 @@ RUN npm install --omit=dev
 
 # Copy application files
 COPY server.js ./
+COPY index.html ./
+COPY assets ./assets
 
 # Create data directory
 RUN mkdir -p /data
