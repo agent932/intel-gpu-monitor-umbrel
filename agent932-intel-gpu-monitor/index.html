@@ -237,10 +237,20 @@
     .p-info { flex: 1; min-width: 0; }
     .p-name { font-size: 14px; font-weight: 600; }
     .p-cmd  { font-size: 12px; color: var(--t3); font-family: "SF Mono", Monaco, monospace; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-top: 2px; }
-    .p-transcode {
-      display: inline-block; margin-top: 4px;
-      font-size: 11px; font-weight: 600; color: var(--accent-hi);
-      background: rgba(83,81,251,0.15); border-radius: 5px; padding: 2px 7px;
+    .p-meta {
+      display: flex; flex-wrap: wrap; gap: 6px; margin-top: 5px; align-items: center;
+    }
+    .p-badge {
+      display: inline-flex; align-items: center; gap: 4px;
+      font-size: 11px; font-weight: 600; border-radius: 5px; padding: 2px 7px;
+    }
+    .p-badge.hw  { background: rgba(74,222,128,0.15); color: #4ADE80; }
+    .p-badge.sw  { background: rgba(251,146,60,0.15);  color: #FB923C; }
+    .p-badge.codec { background: rgba(255,255,255,0.06); color: var(--t2); font-weight: 500; }
+    .p-badge.speed { background: rgba(96,165,250,0.15); color: #60A5FA; }
+    .p-badge.throttled { background: rgba(255,59,48,0.15); color: #FF6B6B; }
+    .p-user {
+      font-size: 12px; color: var(--t3); margin-top: 3px;
     }
 
     .p-pid {
@@ -588,21 +598,69 @@ function processCard(procData) {
         ? '<img src="' + app.icon + '" alt="' + app.name + '" onerror="this.parentNode.innerHTML=\'<svg viewBox=&quot;0 0 24 24&quot; fill=&quot;none&quot; stroke=&quot;currentColor&quot; stroke-width=&quot;2&quot;><rect x=&quot;2&quot; y=&quot;3&quot; width=&quot;20&quot; height=&quot;14&quot; rx=&quot;2&quot;/><path d=&quot;M8 21h8&quot;/><path d=&quot;M12 17v4&quot;/></svg>\'">'
         : '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8"/><path d="M12 17v4"/></svg>';
 
-      var transcode = '';
+      var meta = '';
+      var userLine = '';
       if (proc.plexInfo && proc.plexInfo.isTranscoding) {
         var s = proc.plexInfo.session;
-        transcode = '<div class="p-transcode">Transcoding: ' + s.title + ' (' + s.width + 'x' + s.height + ')</div>';
+
+        // Title line: show show name + episode title for TV, just title for movies
+        var mediaTitle = s.grandparentTitle ? s.grandparentTitle + ' — ' + s.title : s.title;
+
+        // HW/SW badge
+        var hwBadge = '';
+        if (s.transcodeDecision === 'transcode') {
+          if (s.hwEncoding || s.hwDecoding || s.hwFullPipeline) {
+            hwBadge = '<span class="p-badge hw">HW</span>';
+          } else {
+            hwBadge = '<span class="p-badge sw">SW</span>';
+          }
+        } else if (s.transcodeDecision === 'copy') {
+          hwBadge = '<span class="p-badge codec">Direct Stream</span>';
+        } else if (s.transcodeDecision === 'directplay') {
+          hwBadge = '<span class="p-badge codec">Direct Play</span>';
+        }
+
+        // Codec chain
+        var codecBadge = '';
+        if (s.sourceVideoCodec) {
+          var targetCodec = s.targetVideoCodec || s.sourceVideoCodec;
+          var res = s.targetHeight ? s.targetHeight + 'p' : (s.height ? s.height + 'p' : '');
+          codecBadge = '<span class="p-badge codec">' +
+            escHtml(s.sourceVideoCodec.toUpperCase()) +
+            (targetCodec !== s.sourceVideoCodec ? ' → ' + escHtml(targetCodec.toUpperCase()) : '') +
+            (res ? ' · ' + res : '') +
+          '</span>';
+        }
+
+        // Speed badge
+        var speedBadge = '';
+        if (s.transcodeSpeed !== null && s.transcodeDecision === 'transcode') {
+          var speed = parseFloat(s.transcodeSpeed);
+          if (!isNaN(speed)) {
+            speedBadge = s.throttled
+              ? '<span class="p-badge throttled">throttled</span>'
+              : '<span class="p-badge speed">' + speed.toFixed(1) + 'x</span>';
+          }
+        }
+
+        meta = '<div class="p-meta">' + hwBadge + codecBadge + speedBadge + '</div>' +
+               '<div class="p-user">' + escHtml(mediaTitle) + ' · ' + escHtml(s.user) + ' on ' + escHtml(s.player) + '</div>';
+        userLine = '';
+      } else {
+        userLine = proc.command ? '<div class="p-cmd">' + escHtml(proc.command) + '</div>' : '';
       }
+
+      var pidLabel = proc.pid ? 'PID ' + proc.pid : '';
 
       inner +=
         '<div class="process-item">' +
           '<div class="p-icon">' + iconInner + '</div>' +
           '<div class="p-info">' +
             '<div class="p-name">' + escHtml(app.name) + '</div>' +
-            '<div class="p-cmd">' + escHtml(proc.command || '') + '</div>' +
-            transcode +
+            userLine +
+            meta +
           '</div>' +
-          '<div class="p-pid">PID ' + proc.pid + '</div>' +
+          (pidLabel ? '<div class="p-pid">' + pidLabel + '</div>' : '') +
         '</div>';
     }
     inner += '</div>';

@@ -129,35 +129,62 @@ async function getGpuProcesses() {
     }
 }
 
-// Get Plex sessions
+// Get Plex sessions (media sessions + transcode session details)
 async function getPlexSessions() {
     if (!PLEX_ENABLED) {
         return [];
     }
 
-    try {
-        const response = await axios.get(`${PLEX_URL}/status/sessions`, {
-            headers: {
-                'X-Plex-Token': PLEX_TOKEN,
-                'Accept': 'application/json'
-            },
-            timeout: 5000
-        });
+    const headers = { 'X-Plex-Token': PLEX_TOKEN, 'Accept': 'application/json' };
+    const opts = { headers, timeout: 5000 };
 
-        const sessions = response.data.MediaContainer?.Metadata || [];
-        return sessions.map(session => ({
-            title: session.title || 'Unknown',
-            type: session.type || 'unknown',
-            user: session.User?.title || 'Unknown User',
-            player: session.Player?.title || 'Unknown Player',
-            state: session.Player?.state || 'unknown',
-            videoCodec: session.videoCodec || 'unknown',
-            audioCodec: session.audioCodec || 'unknown',
-            transcodeDecision: session.transcodeDecision || 'unknown',
-            width: session.width || 0,
-            height: session.height || 0,
-            bitrate: session.bitrate || 0
-        }));
+    try {
+        const [sessionsResp, transcodeResp] = await Promise.all([
+            axios.get(`${PLEX_URL}/status/sessions`, opts),
+            axios.get(`${PLEX_URL}/transcode/sessions`, opts).catch(() => ({ data: {} }))
+        ]);
+
+        // Build a map of transcode sessions keyed by their session key
+        const transcodeList = transcodeResp.data.MediaContainer?.TranscodeSession || [];
+        const transcodeMap = {};
+        for (const t of transcodeList) {
+            transcodeMap[t.key] = t;
+        }
+
+        const sessions = sessionsResp.data.MediaContainer?.Metadata || [];
+        return sessions.map(session => {
+            const tsKey = session.TranscodeSession?.key;
+            const t = tsKey ? transcodeMap[tsKey] : null;
+
+            return {
+                title:             session.title || 'Unknown',
+                type:              session.type  || 'unknown',
+                grandparentTitle:  session.grandparentTitle || null,  // show name for episodes
+                user:              session.User?.title   || 'Unknown User',
+                player:            session.Player?.title || 'Unknown Device',
+                playerPlatform:    session.Player?.platform || null,
+                state:             session.Player?.state || 'unknown',
+                // Source media
+                sourceVideoCodec:  session.Media?.[0]?.videoCodec || session.videoCodec || 'unknown',
+                sourceAudioCodec:  session.Media?.[0]?.audioCodec || session.audioCodec || 'unknown',
+                width:             session.Media?.[0]?.width  || session.width  || 0,
+                height:            session.Media?.[0]?.height || session.height || 0,
+                bitrate:           session.Media?.[0]?.bitrate || session.bitrate || 0,
+                // Transcode decision
+                transcodeDecision: session.transcodeDecision || 'unknown',
+                // From /transcode/sessions (hardware acceleration + speed)
+                hwEncoding:        t?.transcodeHwEncoding    || false,
+                hwDecoding:        t?.transcodeHwDecoding    || false,
+                hwFullPipeline:    t?.transcodeHwFullPipeline || false,
+                transcodeSpeed:    t?.speed    ?? null,
+                transcodeProgress: t?.progress ?? null,
+                targetVideoCodec:  t?.videoCodec || null,
+                targetAudioCodec:  t?.audioCodec || null,
+                targetWidth:       t?.width  || null,
+                targetHeight:      t?.height || null,
+                throttled:         t?.throttled || false,
+            };
+        });
     } catch (error) {
         console.error('Error fetching Plex sessions:', error.message);
         return [];
